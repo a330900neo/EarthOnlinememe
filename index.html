@@ -1202,7 +1202,7 @@
             let loveStatus = 'A0';
             const loveRoll = Math.random() * 100;
             
-            if (loveRoll < 50) { 
+            if (loveRoll < 60) { 
                 // A0 機率 50%，進一步判定客機型號衍生機率
                 const a0Roll = Math.random() * 100;
                 if (a0Roll < 15) loveStatus = 'A380';
@@ -1215,9 +1215,9 @@
                 else if (a0Roll < 15 + 3 + 1.5 + 3.5 + 3.5 + 1.5 + 1 + 0.5) loveStatus = 'A318';
                 else if (a0Roll < 15 + 3 + 1.5 + 3.5 + 3.5 + 1.5 + 1 + 0.5 + 0.4) loveStatus = 'A310';
                 else loveStatus = 'A0';
-            } else if (loveRoll < 50 + 40) { 
+            } else if (loveRoll < 60 + 30) { 
                 loveStatus = 'A1'; // 40%
-            } else if (loveRoll < 50 + 40 + 8) { 
+            } else if (loveRoll < 60 + 30 + 8) { 
                 loveStatus = 'A2'; // 8%
             } else { 
                 loveStatus = 'A3'; // 2%
