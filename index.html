@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>地球Online - 進入遊戲</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft JhengHei", sans-serif;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #020408; /* 更深邃的宇宙底色 */
+            color: #fff;
+        }
+
+        /* 3D 畫布容器 */
+        #earth-3d-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        /* 畫面暗度與科幻大氣光暈遮罩 */
+        .bg-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 35% 50%, transparent 20%, rgba(2, 4, 8, 0.7) 95%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* 全螢幕基礎設定 */
+        .screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .screen.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* 階段 1：初始黑屏 */
+        #init-screen {
+            background-color: #020408;
+            align-items: center;
+            cursor: pointer;
+            z-index: 15;
+            transition: opacity 0.8s ease;
+        }
+
+        #init-screen:not(.active) {
+            background-color: transparent;
+        }
+
+        .prompt-text {
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            animation: pulse 2s infinite;
+            padding: 20px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(0,168,255,0.5);
+        }
+
+        .orientation-warning {
+            display: none;
+            color: #ff4757;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        @media (orientation: portrait) {
+            .orientation-warning { display: block; }
+        }
+
+        /* 階段 2：載入畫面 */
+        #loading-screen {
+            align-items: center;
+            z-index: 12;
+        }
+
+        .loading-content {
+            position: absolute;
+            bottom: 12%;
+            width: 80%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .tips-text {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            min-height: 2rem;
+            text-align: center;
+            text-shadow: 0 2px 8px rgba(0,0,0,1);
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #1e3799, #00a8ff);
+            box-shadow: 0 0 10px #00a8ff;
+        }
+
+        .progress-status {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            font-family: monospace;
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* 左側面板共通樣式 */
+        .left-panel-container {
+            z-index: 10;
+            margin-left: 8vw; 
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; 
+            max-height: 90vh;
+            width: 450px;
+            max-width: 85vw;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .screen.active .left-panel-container {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .game-title {
+            font-size: 3.2rem;
+            font-weight: 900;
+            margin-bottom: 30px;
+            letter-spacing: 6px;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.9);
+            flex-shrink: 0;
+        }
+        .game-title .blue { color: #00a8ff; }
+        .game-title .white { color: #ffffff; }
+
+        .page-header {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #00a8ff;
+            margin-bottom: 4px;
+            letter-spacing: 4px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            flex-shrink: 0;
+        }
+
+        .page-subtitle {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.4);
+            font-family: monospace;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            flex-shrink: 0;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 220px;
+        }
+
+        .menu-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 14px 20px;
+            font-size: 1.1rem;
+            letter-spacing: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: all 0.25s ease;
+            text-align: left; 
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .menu-btn::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 0;
+            background-color: #00a8ff;
+            transition: height 0.25s ease;
+        }
+
+        .menu-btn:hover:not(.disabled)::before { height: 60%; }
+        .menu-btn:hover:not(.disabled) {
+            background: rgba(0, 168, 255, 0.15);
+            border-color: #00a8ff;
+            box-shadow: 0 0 15px rgba(0, 168, 255, 0.3);
+            transform: translateX(5px);
+        }
+        .menu-btn:active:not(.disabled) { transform: translateX(2px) scale(0.98); }
+        .menu-btn.disabled {
+            background: rgba(40, 40, 40, 0.4);
+            border-color: rgba(100, 100, 100, 0.1);
+            color: #555555;
+            cursor: not-allowed;
+            pointer-events: none;
+            padding-left: 30px;
+        }
+
+        .content-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-height: 48vh;
+            overflow-y: auto;
+            padding-right: 6px;
+            margin-bottom: 15px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .content-list::-webkit-scrollbar { width: 4px; }
+        .content-list::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); }
+        .content-list::-webkit-scrollbar-thumb { background: rgba(0, 168, 255, 0.4); border-radius: 2px; }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            flex-shrink: 0;
+        }
+
+        .setting-label { font-size: 1rem; color: #e0e0e0; letter-spacing: 1px; }
+        .setting-value-locked {
+            font-size: 0.85rem;
+            color: #ff4757;
+            background: rgba(255, 71, 87, 0.1);
+            border: 1px solid rgba(255, 71, 87, 0.3);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .server-item { cursor: pointer; transition: all 0.2s ease; }
+        .server-item:hover {
+            background: rgba(0, 168, 255, 0.1);
+            border-color: rgba(0, 168, 255, 0.3);
+            transform: translateX(4px);
+        }
+        .server-info { display: flex; flex-direction: column; text-align: left; }
+        .server-name { font-size: 1rem; font-weight: bold; color: #fff; letter-spacing: 1px; }
+        .server-players { font-size: 0.75rem; color: rgba(255, 255, 255, 0.4); margin-top: 2px; }
+        .server-stats { display: flex; flex-direction: column; align-items: flex-end; font-family: monospace; }
+        .server-ping { font-size: 0.9rem; font-weight: bold; }
+        
+        .ping-low { color: #2ecc71; }
+        .ping-med { color: #f1c40f; }
+        .ping-high { color: #ea2027; animation: blink 1s infinite; }
+
+        .notice-text {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.35);
+            margin-bottom: 15px;
+            line-height: 1.4;
+            flex-shrink: 0;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 24px;
+            font-size: 0.95rem;
+            letter-spacing: 4px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        .back-btn:hover { background: white; color: black; transform: translateX(3px); }
+
+        /* Toast 通知系統 */
+        #toast-container {
+            position: fixed;
+            top: 6%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+            width: 100%;
+            max-width: 480px;
+            padding: 0 20px;
+        }
+
+        .toast {
+            background: linear-gradient(135deg, rgba(10, 20, 35, 0.95) 0%, rgba(3, 7, 15, 0.98) 100%);
+            border-left: 4px solid #00a8ff;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 168, 255, 0.2);
+            color: #e0e6ed;
+            padding: 14px 22px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            line-height: 1.5;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateY(-20px) scale(0.95);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15);
+            pointer-events: auto;
+            white-space: pre-line;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .toast.show { opacity: 1; transform: translateY(0) scale(1); }
+        .toast.critical {
+            border-left-color: #ff4757;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 71, 87, 0.3);
+        }
+
+        /* 手機橫屏適應 */
+        @media (max-height: 480px) {
+            .left-panel-container { margin-left: 5vw; }
+            .game-title { font-size: 2rem; margin-bottom: 15px; }
+            .page-header { font-size: 1.5rem; }
+            .page-subtitle { margin-bottom: 12px; }
+            .menu-btn { padding: 10px 15px; font-size: 0.95rem; padding-left: 25px; }
+            .content-list { max-height: 42vh; gap: 8px; }
+            .list-item { padding: 8px 14px; }
+            .server-name, .setting-label { font-size: 0.9rem; }
+            .notice-text { font-size: 0.7rem; margin-bottom: 10px; }
+            .back-btn { padding: 8px 20px; font-size: 0.85rem; }
+            #toast-container { top: 3%; }
+            .toast { padding: 10px 18px; font-size: 0.85rem; }
+        }
+
+        /* 關於彈窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            z-index: 100; display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-content {
+            background: linear-gradient(135deg, rgba(25, 35, 50, 0.9) 0%, rgba(10, 15, 25, 0.98) 100%);
+            border: 1px solid rgba(0, 168, 255, 0.3);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
+            width: 85%; max-width: 440px; border-radius: 12px; padding: 25px;
+            transform: scale(0.85); transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            text-align: center;
+        }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+        .modal-header { font-size: 1.5rem; font-weight: bold; color: #00a8ff; margin-bottom: 5px; }
+        .modal-version { font-size: 0.8rem; color: rgba(255, 255, 255, 0.5); font-family: monospace; margin-bottom: 20px; display: block; }
+        .about-body { font-size: 1.05rem; line-height: 1.8; color: #e0e0e0; margin-bottom: 25px; }
+        .modal-btn {
+            background: linear-gradient(90deg, #007cb3, #00a8ff); border: none; color: white;
+            padding: 10px 35px; font-size: 1rem; border-radius: 25px; cursor: pointer; font-weight: bold;
+        }
+
+        @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    </style>
+</head>
+<body>
+
+    <div id="toast-container"></div>
+
+    <div id="earth-3d-container"></div>
+    <div class="bg-overlay"></div>
+
+    <div id="init-screen" class="screen active" onclick="tryStartGame()">
+        <div class="prompt-text">【 點擊螢幕進入 地球Online 】</div>
+        <div class="orientation-warning">※ 為了最佳遊戲體驗，請將手機旋轉至橫屏 (Landscape)</div>
+    </div>
+
+    <div id="loading-screen" class="screen">
+        <div class="loading-content">
+            <div id="tips" class="tips-text">這是一個依賴運氣遊戲</div>
+            <div class="progress-container">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+            <div id="progressStatus" class="progress-status">LOADING... 0%</div>
+        </div>
+    </div>
+
+    <div id="menu-screen" class="screen">
+        <div class="left-panel-container">
+            <h1 class="game-title"><span class="blue">地球</span><span class="white">online</span></h1>
+            <div class="button-group">
+                <div class="menu-btn" onclick="navigateTo('server-screen')">開始</div>
+                <div class="menu-btn" onclick="navigateTo('settings-screen')">設定</div>
+                <div class="menu-btn" onclick="openModal('aboutModal')">關於</div>
+                <div class="menu-btn disabled">退出</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="server-screen" class="screen">
+        <div class="left-panel-container">
+            <h2 class="page-header">選擇伺服器</h2>
+            <div class="page-subtitle">SERVER SELECTION</div>
+            
+            <div class="content-list">
+                <div class="list-item server-item" onclick="triggerServerToast('亞洲')">
+                    <div class="server-info">
+                        <span class="server-name">亞洲伺服器 (Asia)</span>
+                        <span class="server-players">在線人數：47.5 億玩家</span>
+                    </div>
+                    <div class="server-stats"><span class="server-ping ping-low">28 ms</span></div>
+                </div>
+                <div class="list-item server-item" onclick="triggerServerToast('歐洲')">
+                    <div class="server-info">
+                        <span class="server-name">歐洲伺服器 (Europe)</span>
+                        <span class="server-players">在線人數：7.4 億玩家</span>
+                    </div>
+                    <div class="server-stats"><span class="server-ping ping-med">112 ms</span></div>
+                </div>
+                <div class="list-item server-item" onclick="triggerServerToast('北美洲')">
+                    <div class="server-info">
+                        <span class="server-name">北美洲伺服器 (North America)</span>
+                        <span class="server-players">在線人數：3.8 億玩家</span>
+                    </div>
+                    <div class="server-stats"><span class="server-ping ping-med">145 ms</span></div>
+                </div>
+                <div class="list-item server-item" onclick="triggerServerToast('非洲')">
+                    <div class="server-info">
+                        <span class="server-name" style="color: #ff4757;">非洲伺服器 (Africa)</span>
+                        <span class="server-players">在線人數：14.0 億玩家</span>
+                    </div>
+                    <div class="server-stats"><span class="server-ping ping-high">999+ ms</span></div>
+                </div>
+                <div class="list-item server-item" onclick="triggerServerToast('南美洲')">
+                    <div class="server-info">
+                        <span class="server-name">南美洲伺服器 (South America)</span>
+                        <span class="server-players">在線人數：4.4 億玩家</span>
+                    </div>
+                    <div class="server-stats"><span class="server-ping ping-med">260 ms</span></div>
+                </div>
+                <div class="list-item server-item" onclick="triggerServerToast('大洋洲')">
+                    <div class="server-info">
+                        <span class="server-name">大洋洲伺服器 (Oceania)</span>
+                        <span class="server-players">在線人數：0.45 億玩家</span>
+                    </div>
+                    <div class="server-stats"><span class="server-ping ping-low">42 ms</span></div>
+                </div>
+            </div>
+            
+            <p class="notice-text">※ 注意：跨區連線會觸發因果律防護。玩家無法在登入前自主選擇出生地。</p>
+            <div class="back-btn" onclick="navigateTo('menu-screen')">返回主選單</div>
+        </div>
+    </div>
+
+    <div id="settings-screen" class="screen">
+        <div class="left-panel-container">
+            <h2 class="page-header">控制台設定</h2>
+            <div class="page-subtitle">SYSTEM SETTINGS</div>
+            
+            <div class="content-list">
+                <div class="list-item">
+                    <span class="setting-label">分辨率 (Resolution)</span>
+                    <span class="setting-value-locked">隨機 (不可改)</span>
+                </div>
+                <div class="list-item">
+                    <span class="setting-label">語言 (Language)</span>
+                    <span class="setting-value-locked">地區鎖定 (不可改)</span>
+                </div>
+                <div class="list-item">
+                    <span class="setting-label">音量 (Volume)</span>
+                    <span class="setting-value-locked">隨機 (不可改)</span>
+                </div>
+            </div>
+            
+            <p class="notice-text">※ 系統提示：本伺服器核心參數由初始因果律全體鎖定，凡人玩家無修改權限。</p>
+            <div class="back-btn" onclick="navigateTo('menu-screen')">返回主選單</div>
+        </div>
+    </div>
+
+    <div id="aboutModal" class="modal-overlay" onclick="closeModalOnOverlay(event, 'aboutModal')">
+        <div class="modal-content">
+            <div class="modal-header">關於 地球online</div>
+            <span class="modal-version">SYSTEM VERSION v2026.0</span>
+            <div class="about-body">
+                <p>一款依賴運氣的開放式世界遊戲</p>
+                <p>擁有 <span style="color: #00a8ff; font-weight: bold;">80億</span> 同時在線玩家</p>
+            </div>
+            <button class="modal-btn" onclick="closeModal('aboutModal')">確認</button>
+        </div>
+    </div>
+
+    <script>
+        const loadingTips = [
+            "這是一個依賴運氣遊戲",
+            "新手教程需時十八年",
+            "拍拖副本為高難度副本",
+            "保持理智值是生存的其中一個好祕訣"
+        ];
+
+        // Toast 通知系統
+        function showToast(message, isCritical = false) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${isCritical ? 'critical' : ''}`;
+            toast.innerText = message;
+            
+            container.appendChild(toast);
+            void toast.offsetWidth; 
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.addEventListener('transitionend', () => toast.remove());
+            }, 3500);
+        }
+
+        function triggerServerToast(serverName) {
+            if (serverName === '非洲') {
+                showToast(`[ERROR] 連線至【非洲伺服器】失敗！\n錯誤代碼：999 (Latency Overflow)\n提示：該服環境惡劣且嚴重超時，系統已攔截您的跨區登入。`, true);
+            } else {
+                showToast(`[SYSTEM] 因果律阻斷中...\n您沒有權限自選【${serverName}】。系統即將為您隨機抽取投胎地。`, false);
+            }
+        }
+
+        // ─── Three.js 寫實級 3D 地球引擎（Follow Franky Hung Tutorial） ───
+        let scene, camera, renderer, earthGroup, earthMesh, cloudMesh, atmosMesh;
+        let targetCamX = 0;
+        let earthShaderRef = null;
+        let cloudOffsetVal = 0;
+
+        function initRealEarth() {
+            const container = document.getElementById('earth-3d-container');
+            
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 0, 12.5);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            
+            // 色彩空間管理：確保顏色輸出符合現代 sRGB 標準畫質
+            renderer.outputColorSpace = THREE.SRGBColorSpace;
+            if (renderer.outputEncoding !== undefined) {
+                renderer.outputEncoding = THREE.sRGBEncoding;
+            }
+            container.appendChild(renderer.domElement);
+
+            // 1. 銀河背景（Galactic Background）
+            const textureLoader = new THREE.TextureLoader();
+            textureLoader.setCrossOrigin('anonymous');
+            
+            const spaceBg = textureLoader.load('https://unpkg.com/three-globe/example/img/night-sky.png');
+            scene.background = spaceBg;
+
+            // 2. 太空光照（Sun Light & Environment Ambient）
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.15); // 微弱的宇宙深空背景光
+            scene.add(ambientLight);
+
+            const sunLight = new THREE.DirectionalLight(0xffffff, 1.8); // 太陽直射光強度 1.8
+            sunLight.position.set(12, 4, 7); // 強烈側向太陽光，營造史詩級畫質的陰暗交界線
+            scene.add(sunLight);
+
+            // 3. 創建地球控制組，設定真實地軸傾斜（Axial Tilt = 23.5°）
+            earthGroup = new THREE.Group();
+            earthGroup.rotation.z = (23.5 / 360) * 2 * Math.PI;
+            scene.add(earthGroup);
+
+            // 4. 載入高解析度 NASA 衛星圖資源
+            const albedoMap = textureLoader.load('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
+            albedoMap.colorSpace = THREE.SRGBColorSpace; // 顏色貼圖轉為 sRGB
+
+            const nightMap = textureLoader.load('https://unpkg.com/three-globe/example/img/earth-night.jpg');
+            nightMap.colorSpace = THREE.SRGBColorSpace; // 夜景燈光貼圖
+
+            const bumpMap = textureLoader.load('https://unpkg.com/three-globe/example/img/earth-topology.png');
+            const oceanMap = textureLoader.load('https://unpkg.com/three-globe/example/img/earth-water.png'); // 海洋遮罩
+
+            // 5. 構建地球本體與高階 Shader 注入（onBeforeCompile）
+            const earthGeometry = new THREE.SphereGeometry(4.5, 64, 64);
+            const earthMaterial = new THREE.MeshStandardMaterial({
+                map: albedoMap,
+                bumpMap: bumpMap,
+                bumpScale: 0.08, // 地貌立體凹凸陰影
+                roughnessMap: oceanMap, // 用於自訂 Shader 翻轉
+                metalnessMap: oceanMap,   // 用於自訂 Shader 翻轉
+                emissiveMap: nightMap,
+                emissive: new THREE.Color(0xfffcaa) // 溫暖的城市夜景霓虹燈色
+            });
+
+            // 核心畫質提升：注入自訂著色器片段，計算海洋反射與動態陰影
+            earthMaterial.onBeforeCompile = function(shader) {
+                // 將太陽位置向量與雲層偏移量作為 Uniforms 傳入
+                shader.uniforms.uSunDirection = { value: sunLight.position.clone().normalize() };
+                shader.uniforms.tClouds = { value: textureLoader.load('https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/textures/planets/earth_clouds_1024.png') };
+                shader.uniforms.uCloudOffset = { value: 0.0 };
+                
+                earthShaderRef = shader; // 儲存參照以便在 animate 內更新
+
+                // 頂點著色器擴充：計算並傳遞頂點的世界法線
+                shader.vertexShader = shader.vertexShader.replace(
+                    '#include <common>',
+                    `#include <common>
+                     varying vec3 vWorldNormal;`
+                );
+                shader.vertexShader = shader.vertexShader.replace(
+                    '#include <beginnormal_vertex>',
+                    `#include <beginnormal_vertex>
+                     vWorldNormal = normalize(mat3(modelMatrix) * objectNormal);`
+                );
+
+                // 片段著色器擴充：聲明變數
+                shader.fragmentShader = shader.fragmentShader.replace(
+                    '#include <common>',
+                    `#include <common>
+                     uniform vec3 uSunDirection;
+                     uniform sampler2D tClouds;
+                     uniform float uCloudOffset;
+                     varying vec3 vWorldNormal;`
+                );
+
+                // 升級 A. 雲層陰影投射 (Cloud Shadows via Negative Light Map)
+                shader.fragmentShader = shader.fragmentShader.replace(
+                    '#include <map_fragment>',
+                    `#include <map_fragment>
+                     vec2 cloudUV = vMapUv;
+                     cloudUV.x -= uCloudOffset; // 同步雲層自轉
+                     float cloudSample = texture2D(tClouds, cloudUV).r;
+                     // 雲層在陸地和海洋上投下自然柔和的暗部陰影
+                     diffuseColor.rgb *= mix(1.0, 0.42, cloudSample);`
+                );
+
+                // 升級 B. 海洋鏡面高光反射 (Ocean Specular Reflection & Roughness Inversion)
+                // 翻轉海洋遮罩：讓陸地粗糙不反光（Roughness=1.0），讓海洋呈現剔透的鏡面高光
+                shader.fragmentShader = shader.fragmentShader.replace(
+                    '#include <roughnessmap_fragment>',
+                    `#include <roughnessmap_fragment>
+                     float oceanMask = texture2D(roughnessMap, vRoughnessMapUv).g;
+                     roughnessFactor = mix(1.0, 0.22, oceanMask);`
+                );
+                shader.fragmentShader = shader.fragmentShader.replace(
+                    '#include <metalnessmap_fragment>',
+                    `#include <metalnessmap_fragment>
+                     float oceanMetal = texture2D(metalnessMap, vMetalnessMapUv).g;
+                     metalnessFactor = mix(0.0, 0.75, oceanMetal);`
+                );
+
+                // 升級 C. 晝夜交界動態夜景 (Dynamic Night Lights)
+                // 利用法線與太陽光的點積，確保城市燈光僅在背光的「黑夜那一側」亮起，白天完全隱形
+                shader.fragmentShader = shader.fragmentShader.replace(
+                    '#include <emissivemap_fragment>',
+                    `#include <emissivemap_fragment>
+                     float nightSideMask = smoothstep(-0.18, 0.18, -dot(normalize(vWorldNormal), uSunDirection));
+                     totalEmissiveRadiance *= nightSideMask;`
+                );
+            };
+
+            earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
+            earthMesh.rotateY(-1.8); // 初始角度對齊
+            earthGroup.add(earthMesh);
+
+            // 6. 獨立動態大氣雲層（Clouds Layer）
+            const cloudGeometry = new THREE.SphereGeometry(4.55, 64, 64);
+            const cloudTexture = textureLoader.load('https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/textures/planets/earth_clouds_1024.png');
+            const cloudMaterial = new THREE.MeshStandardMaterial({
+                alphaMap: cloudTexture,
+                transparent: true,
+                opacity: 0.42,
+                blending: THREE.NormalBlending
+            });
+            cloudMesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
+            cloudMesh.rotateY(-1.8);
+            earthGroup.add(cloudMesh);
+
+            // 7. 靈魂大氣外層光暈（Atmospheric Fresnel Glow Shader）
+            // 透過自訂 Shader 逼真還原外太空看地球時，邊緣呈現的淡藍色菲涅爾大氣散射 Halo 效果
+            const atmosGeometry = new THREE.SphereGeometry(4.5 * 1.12, 64, 64);
+            const atmosMaterial = new THREE.ShaderMaterial({
+                vertexShader: `
+                    varying vec3 vNormal;
+                    varying vec3 vViewPosition;
+                    void main() {
+                        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                        vNormal = normalize(normalMatrix * normal);
+                        vViewPosition = -mvPosition.xyz;
+                        gl_Position = projectionMatrix * mvPosition;
+                    }
+                `,
+                fragmentShader: `
+                    varying vec3 vNormal;
+                    varying vec3 vViewPosition;
+                    void main() {
+                        vec3 normal = normalize(vNormal);
+                        vec3 viewDir = normalize(vViewPosition);
+                        // 菲涅爾邊緣效應：越接近球體邊緣，大氣散射越強烈
+                        float intensity = pow(0.65 - dot(normal, viewDir), 2.5);
+                        vec3 atmosphereColor = vec3(0.35, 0.68, 1.0); // 絕美的外太空蔚藍光芒
+                        gl_FragColor = vec4(atmosphereColor * intensity, intensity * 0.7);
+                    }
+                `,
+                blending: THREE.AdditiveBlending,
+                side: THREE.BackSide, // 渲染背面，產生圍繞整顆球體的外包圍圈效果
+                transparent: true
+            });
+            atmosMesh = new THREE.Mesh(atmosGeometry, atmosMaterial);
+            earthGroup.add(atmosMesh);
+
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // 異速氣流自轉運動（使用 rotateY 保持其處於 23.5° Local 座標軸旋轉）
+            if (earthMesh) earthMesh.rotateY(0.0009);
+            if (cloudMesh) cloudMesh.rotateY(0.0015); // 雲層飄移稍快
+
+            // 動態同步：計算雲層與陸地的相對旋轉，實時將位置傳遞給陰影 Shader
+            cloudOffsetVal += (0.0015 - 0.0009) / (2 * Math.PI);
+            if (earthShaderRef) {
+                earthShaderRef.uniforms.uCloudOffset.value = cloudOffsetVal;
+            }
+
+            // 鏡頭滑動平滑插值 (Lerp) 實現面板切換時地球的橫向位移
+            camera.position.x += (targetCamX - camera.position.x) * 0.06;
+
+            renderer.render(scene, camera);
+        }
+
+        // 啟動與全螢幕序列
+        function tryStartGame() {
+            const docElm = document.documentElement;
+            if (docElm.requestFullscreen) { docElm.requestFullscreen(); }
+            else if (docElm.webkitRequestFullScreen) { docElm.webkitRequestFullScreen(); }
+
+            document.getElementById('init-screen').classList.remove('active');
+            document.getElementById('loading-screen').classList.add('active');
+            startLoadingSequence();
+        }
+
+        function startLoadingSequence() {
+            const progressBar = document.getElementById('progressBar');
+            const progressStatus = document.getElementById('progressStatus');
+            const tips = document.getElementById('tips');
+            
+            let currentProgress = 0;
+            const totalDuration = 12000; 
+            const startTime = Date.now();
+
+            let tipIndex = 0;
+            const tipInterval = setInterval(() => {
+                tipIndex++;
+                if (tipIndex < loadingTips.length) { tips.innerText = loadingTips[tipIndex]; }
+            }, 3000);
+
+            function updateProgress() {
+                const elapsedTime = Date.now() - startTime;
+                if (elapsedTime >= totalDuration) {
+                    currentProgress = 100;
+                    progressBar.style.width = currentProgress + '%';
+                    progressStatus.innerText = `LOADING... ${Math.floor(currentProgress)}%`;
+                    clearInterval(tipInterval);
+                    setTimeout(goToMainMenu, 500); 
+                    return;
+                }
+
+                const idealProgress = (elapsedTime / totalDuration) * 100;
+                if (Math.random() > 0.45 || currentProgress === 0) {
+                    const jump = Math.random() * 12 + 2; 
+                    currentProgress = Math.min(currentProgress + jump, idealProgress + 12);
+                    if (currentProgress > 96 && elapsedTime < totalDuration - 1200) { currentProgress = 96; }
+                    progressBar.style.width = currentProgress + '%';
+                    progressStatus.innerText = `LOADING... ${Math.floor(currentProgress)}%`;
+                }
+                setTimeout(updateProgress, Math.random() * 400 + 150);
+            }
+            updateProgress();
+        }
+
+        function goToMainMenu() {
+            document.getElementById('loading-screen').classList.remove('active');
+            document.getElementById('menu-screen').classList.add('active');
+            
+            adjustEarthPosition(true);
+            showToast("⚠️ 系統提示：成功登入伺服器群。目前線上玩家壅塞。");
+        }
+
+        function adjustEarthPosition(isShifted) {
+            const isLandscape = window.innerWidth > window.innerHeight;
+            if (isShifted) {
+                targetCamX = isLandscape ? -2.6 : -1.0;
+            } else {
+                targetCamX = 0;
+            }
+        }
+
+        function navigateTo(targetScreenId) {
+            document.getElementById('menu-screen').classList.remove('active');
+            document.getElementById('settings-screen').classList.remove('active');
+            document.getElementById('server-screen').classList.remove('active');
+            
+            document.getElementById(targetScreenId).classList.add('active');
+        }
+
+        function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
+        function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
+        function closeModalOnOverlay(event, modalId) { if (event.target === document.getElementById(modalId)) { closeModal(modalId); } }
+
+        window.onload = () => {
+            initRealEarth();
+        };
+
+        window.addEventListener('resize', () => {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            if(camera && renderer) {
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderer.setSize(width, height);
+            }
+            
+            const menuActive = !document.getElementById('init-screen').classList.contains('active') && 
+                               !document.getElementById('loading-screen').classList.contains('active');
+            if (menuActive) adjustEarthPosition(true);
+
+            if (document.getElementById('init-screen').classList.contains('active')) {
+                document.querySelector('.orientation-warning').style.display = (height > width) ? 'block' : 'none';
+            }
+        });
+    </script>
+</body>
+</html>
