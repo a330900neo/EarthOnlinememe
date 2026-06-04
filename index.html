@@ -43,35 +43,10 @@
             pointer-events: auto;
         }
 
-        /* 階段 1：初始黑屏與旋轉提示 */
-        #init-screen {
-            background-color: #000;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .prompt-text {
-            font-size: 1.2rem;
-            letter-spacing: 2px;
-            animation: pulse 2s infinite;
-            padding: 20px;
-            text-align: center;
-            text-shadow: 0 0 10px rgba(0, 168, 255, 0.5);
-        }
-
-        .orientation-warning {
-            display: none;
-            color: #ff4757;
-            margin-top: 15px;
-            font-size: 0.9rem;
-            text-align: center;
-        }
-
-        @media (orientation: portrait) {
-            .orientation-warning {
-                display: block;
-            }
-        }
+        #init-screen { background-color: #000; align-items: center; cursor: pointer; }
+        .prompt-text { font-size: 1.2rem; letter-spacing: 2px; animation: pulse 2s infinite; padding: 20px; text-align: center; text-shadow: 0 0 10px rgba(0, 168, 255, 0.5); }
+        .orientation-warning { display: none; color: #ff4757; margin-top: 15px; font-size: 0.9rem; text-align: center; }
+        @media (orientation: portrait) { .orientation-warning { display: block; } }
 
         /* 3D 地球畫布容器 */
         .game-bg-container {
@@ -84,18 +59,9 @@
             overflow: hidden;
             transition: transform 2s cubic-bezier(0.25, 1, 0.5, 1);
         }
+        .game-bg-container.shifted { transform: translateX(12vw); }
+        #three-canvas { width: 100%; height: 100%; display: block; }
 
-        .game-bg-container.shifted {
-            transform: translateX(12vw);
-        }
-
-        #three-canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-
-        /* 畫面暗度遮罩 */
         .bg-overlay {
             position: absolute;
             top: 0;
@@ -107,559 +73,163 @@
             pointer-events: none;
         }
 
-        /* 階段 2：載入畫面 */
-        #loading-screen {
-            align-items: center;
-            z-index: 5;
-            background-color: rgba(0,0,0,0.5);
-        }
+        #loading-screen { align-items: center; z-index: 5; background-color: rgba(0,0,0,0.5); }
+        .loading-content { position: absolute; bottom: 12%; width: 80%; max-width: 600px; display: flex; flex-direction: column; align-items: center; z-index: 10; }
+        .tips-text { font-size: 1.1rem; margin-bottom: 20px; min-height: 2rem; text-align: center; text-shadow: 0 2px 8px rgba(0,0,0,1); letter-spacing: 1px; font-weight: bold; }
+        .progress-container { width: 100%; height: 8px; background-color: rgba(255, 255, 255, 0.15); border-radius: 4px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #1e3799, #00a8ff); box-shadow: 0 0 10px #00a8ff; }
+        .progress-status { margin-top: 8px; font-size: 0.8rem; font-family: monospace; color: rgba(255,255,255,0.7); }
 
-        .loading-content {
-            position: absolute;
-            bottom: 12%;
-            width: 80%;
-            max-width: 600px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            z-index: 10;
-        }
-
-        .tips-text {
-            font-size: 1.1rem;
-            margin-bottom: 20px;
-            min-height: 2rem;
-            text-align: center;
-            text-shadow: 0 2px 8px rgba(0,0,0,1);
-            letter-spacing: 1px;
-            font-weight: bold;
-        }
-
-        .progress-container {
-            width: 100%;
-            height: 8px;
-            background-color: rgba(255, 255, 255, 0.15);
-            border-radius: 4px;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .progress-bar {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, #1e3799, #00a8ff);
-            box-shadow: 0 0 10px #00a8ff;
-        }
-
-        .progress-status {
-            margin-top: 8px;
-            font-size: 0.8rem;
-            font-family: monospace;
-            color: rgba(255,255,255,0.7);
-        }
-
-        /* UI 左側面板共通樣式 */
-        .left-panel-container {
-            z-index: 10;
-            margin-left: 8vw; 
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start; 
-            max-height: 90vh; 
-            width: 320px;
-            max-width: 85vw;
-            opacity: 0;
-            transform: translateX(-20px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
-        }
-
-        .screen.active .left-panel-container {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        /* 主標題 */
-        .game-title {
-            font-size: 3.2rem;
-            font-weight: 900;
-            margin-bottom: 30px;
-            letter-spacing: 6px;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.9);
-            flex-shrink: 0;
-        }
-
+        .left-panel-container { z-index: 10; margin-left: 8vw; display: flex; flex-direction: column; align-items: flex-start; max-height: 90vh; width: 320px; max-width: 85vw; opacity: 0; transform: translateX(-20px); transition: opacity 0.5s ease, transform 0.5s ease; }
+        .screen.active .left-panel-container { opacity: 1; transform: translateX(0); }
+        .game-title { font-size: 3.2rem; font-weight: 900; margin-bottom: 30px; letter-spacing: 6px; text-shadow: 0 4px 20px rgba(0,0,0,0.9); flex-shrink: 0; }
         .game-title .blue { color: #00a8ff; }
         .game-title .white { color: #ffffff; }
+        .page-header { font-size: 2.2rem; font-weight: bold; color: #00a8ff; margin-bottom: 4px; letter-spacing: 4px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); flex-shrink: 0; }
+        .page-subtitle { font-size: 0.85rem; color: rgba(255, 255, 255, 0.4); font-family: monospace; margin-bottom: 20px; letter-spacing: 2px; flex-shrink: 0; }
 
-        /* 二級頁面標題 */
-        .page-header {
-            font-size: 2.2rem;
-            font-weight: bold;
-            color: #00a8ff;
-            margin-bottom: 4px;
-            letter-spacing: 4px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-            flex-shrink: 0;
-        }
-
-        .page-subtitle {
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.4);
-            font-family: monospace;
-            margin-bottom: 20px;
-            letter-spacing: 2px;
-            flex-shrink: 0;
-        }
-
-        /* 按鈕群 */
-        .button-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            width: 220px;
-        }
-
-        .menu-btn {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            color: white;
-            padding: 14px 20px;
-            font-size: 1.1rem;
-            letter-spacing: 6px;
-            border-radius: 6px;
-            cursor: pointer;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            transition: all 0.25s ease;
-            text-align: left; 
-            padding-left: 30px;
-            position: relative;
-            flex-shrink: 0;
-            overflow: hidden;
-        }
-
-        .menu-btn::before {
-            content: '';
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 4px;
-            height: 0;
-            background-color: #00a8ff;
-            transition: height 0.25s ease;
-        }
-
+        .button-group { display: flex; flex-direction: column; gap: 12px; width: 220px; }
+        .menu-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.25); color: white; padding: 14px 20px; font-size: 1.1rem; letter-spacing: 6px; border-radius: 6px; cursor: pointer; backdrop-filter: blur(8px); transition: all 0.25s ease; text-align: left; padding-left: 30px; position: relative; flex-shrink: 0; overflow: hidden; }
+        .menu-btn::before { content: ''; position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 4px; height: 0; background-color: #00a8ff; transition: height 0.25s ease; }
         .menu-btn:hover:not(.disabled)::before { height: 60%; }
-        .menu-btn:hover:not(.disabled) {
-            background: rgba(0, 168, 255, 0.2);
-            border-color: #00a8ff;
-            box-shadow: 0 0 15px rgba(0, 168, 255, 0.4);
-            transform: translateX(5px);
-        }
-
+        .menu-btn:hover:not(.disabled) { background: rgba(0, 168, 255, 0.2); border-color: #00a8ff; box-shadow: 0 0 15px rgba(0, 168, 255, 0.4); transform: translateX(5px); }
         .menu-btn:active:not(.disabled) { transform: translateX(2px) scale(0.98); }
-        .menu-btn.disabled {
-            background: rgba(40, 40, 40, 0.4);
-            border-color: rgba(100, 100, 100, 0.2);
-            color: #666666;
-            cursor: not-allowed;
-            pointer-events: none;
-            padding-left: 30px;
-        }
+        .menu-btn.disabled { background: rgba(40, 40, 40, 0.4); border-color: rgba(100, 100, 100, 0.2); color: #666666; cursor: not-allowed; pointer-events: none; padding-left: 30px; }
 
-        /* 列表容器 */
-        .content-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 100%;
-            max-height: 52vh; 
-            overflow-y: auto;
-            padding-right: 6px;
-            margin-bottom: 15px;
-            -webkit-overflow-scrolling: touch;
-        }
-
+        .content-list { display: flex; flex-direction: column; gap: 10px; width: 100%; max-height: 52vh; overflow-y: auto; padding-right: 6px; margin-bottom: 15px; -webkit-overflow-scrolling: touch; }
         .content-list::-webkit-scrollbar { width: 4px; }
         .content-list::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); border-radius: 2px; }
         .content-list::-webkit-scrollbar-thumb { background: rgba(0, 168, 255, 0.4); border-radius: 2px; }
-
-        .list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 10px 14px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            flex-shrink: 0; 
-        }
-
+        .list-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px); flex-shrink: 0; }
         .setting-label { font-size: 1rem; color: #e0e0e0; letter-spacing: 1px; }
-        .setting-value-locked {
-            font-size: 0.85rem;
-            color: #ff4757;
-            background: rgba(255, 71, 87, 0.12);
-            border: 1px solid rgba(255, 71, 87, 0.4);
-            padding: 4px 12px;
-            border-radius: 4px;
-            cursor: not-allowed;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-
+        .setting-value-locked { font-size: 0.85rem; color: #ff4757; background: rgba(255, 71, 87, 0.12); border: 1px solid rgba(255, 71, 87, 0.4); padding: 4px 12px; border-radius: 4px; cursor: not-allowed; font-weight: bold; letter-spacing: 1px; }
         .server-item { cursor: pointer; transition: all 0.2s ease; }
-        .server-item:hover {
-            background: rgba(0, 168, 255, 0.12);
-            border-color: rgba(0, 168, 255, 0.4);
-            transform: translateX(4px);
-        }
+        .server-item:hover { background: rgba(0, 168, 255, 0.12); border-color: rgba(0, 168, 255, 0.4); transform: translateX(4px); }
         .server-info { display: flex; flex-direction: column; text-align: left; }
         .server-name { font-size: 0.95rem; font-weight: bold; color: #fff; letter-spacing: 1px; }
         .server-players { font-size: 0.75rem; color: rgba(255, 255, 255, 0.45); margin-top: 2px; }
+        .back-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 10px 24px; font-size: 0.95rem; letter-spacing: 4px; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; font-weight: bold; width: fit-content; flex-shrink: 0; }
+        .back-btn:hover { background: white; color: black; box-shadow: 0 0 15px rgba(255, 255, 255, 0.4); transform: translateX(3px); }
 
-        .back-btn {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            padding: 10px 24px;
-            font-size: 0.95rem;
-            letter-spacing: 4px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-weight: bold;
-            width: fit-content;
-            flex-shrink: 0;
-        }
+        .right-panel-container { z-index: 10; position: absolute; right: 8vw; top: 50%; transform: translateY(-50%) translateX(20px); display: flex; flex-direction: column; width: 280px; opacity: 0; pointer-events: none; transition: opacity 0.5s ease, transform 0.5s ease; background: rgba(10, 20, 30, 0.75); padding: 30px; border-radius: 12px; border: 1px solid rgba(0, 168, 255, 0.3); backdrop-filter: blur(10px); box-shadow: 0 0 30px rgba(0, 168, 255, 0.15); }
+        #server-screen.active .right-panel-container { opacity: 1; pointer-events: auto; transform: translateY(-50%) translateX(0); }
+        .btn-icon { width: 22px; height: 22px; filter: invert(1); vertical-align: middle; margin-right: 12px; margin-top: -3px; }
 
-        .back-btn:hover {
-            background: white;
-            color: black;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
-            transform: translateX(3px);
-        }
+        .center-message { font-size: 3rem; letter-spacing: 15px; font-weight: bold; color: #00a8ff; text-shadow: 0 0 30px rgba(0, 168, 255, 0.8); text-align: center; }
 
-        /* UI 右側面板 (登入或註冊) */
-        .right-panel-container {
-            z-index: 10;
-            position: absolute;
-            right: 8vw;
-            top: 50%;
-            transform: translateY(-50%) translateX(20px);
-            display: flex;
-            flex-direction: column;
-            width: 280px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.5s ease, transform 0.5s ease;
-            background: rgba(10, 20, 30, 0.75);
-            padding: 30px;
-            border-radius: 12px;
-            border: 1px solid rgba(0, 168, 255, 0.3);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 0 30px rgba(0, 168, 255, 0.15);
-        }
-
-        #server-screen.active .right-panel-container {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateY(-50%) translateX(0);
-        }
-
-        .btn-icon {
-            width: 22px;
-            height: 22px;
-            filter: invert(1);
-            vertical-align: middle;
-            margin-right: 12px;
-            margin-top: -3px;
-        }
-
-        /* 投胎與出生點畫面 */
-        .center-message {
-            font-size: 3rem;
-            letter-spacing: 15px;
-            font-weight: bold;
-            color: #00a8ff;
-            text-shadow: 0 0 30px rgba(0, 168, 255, 0.8);
-            text-align: center;
-        }
-
-        /* 出生點簡介 Popup - 設定完全透明，避免擋到地球 */
-        .spawn-overlay {
-            position: absolute;
-            right: 8vw;
-            top: 50%;
-            transform: translateY(-50%);
-            background: transparent; 
-            border: none;             
-            padding: 30px 25px;
-            border-radius: 0;
-            backdrop-filter: none;    
-            -webkit-backdrop-filter: none;
-            text-align: center;
-            width: 320px;
-            box-shadow: none;         
-            opacity: 0;
-            transition: opacity 1s ease;
-        }
-
+        .spawn-overlay { position: absolute; right: 8vw; top: 50%; transform: translateY(-50%); background: transparent; border: none; padding: 30px 25px; border-radius: 0; text-align: center; width: 320px; opacity: 0; transition: opacity 1s ease; }
         #spawn-screen.active .spawn-overlay { opacity: 1; }
-        
-        .spawn-title { 
-            font-size: 2rem; 
-            color: #fff; 
-            margin-bottom: 5px; 
-            letter-spacing: 4px; 
-            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.95), 0 0 4px rgba(0, 0, 0, 0.8);
-        }
-        .spawn-location { 
-            font-size: 1.5rem; 
-            color: #00a8ff; 
-            font-weight: bold; 
-            margin-bottom: 15px; 
-            letter-spacing: 2px; 
-            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.95), 0 0 4px rgba(0, 0, 0, 0.8);
-        }
-        .spawn-desc { 
-            font-size: 0.95rem; 
-            color: #eee; 
-            line-height: 1.6; 
-            margin-bottom: 25px; 
-            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.95), 0 0 4px rgba(0, 0, 0, 0.8);
-        }
-        
-        .spawn-overlay .menu-btn { 
-            width: 100%; 
-            text-align: center; 
-            padding-left: 0; 
-            background: rgba(0, 168, 255, 0.25); 
-            border-color: rgba(0, 168, 255, 0.6);
-        }
+        .spawn-title { font-size: 2rem; color: #fff; margin-bottom: 5px; letter-spacing: 4px; text-shadow: 0 2px 12px rgba(0, 0, 0, 0.95), 0 0 4px rgba(0, 0, 0, 0.8); }
+        .spawn-location { font-size: 1.5rem; color: #00a8ff; font-weight: bold; margin-bottom: 15px; letter-spacing: 2px; text-shadow: 0 2px 12px rgba(0, 0, 0, 0.95), 0 0 4px rgba(0, 0, 0, 0.8); }
+        .spawn-desc { font-size: 0.95rem; color: #eee; line-height: 1.6; margin-bottom: 25px; text-shadow: 0 2px 12px rgba(0, 0, 0, 0.95), 0 0 4px rgba(0, 0, 0, 0.8); }
+        .spawn-overlay .menu-btn { width: 100%; text-align: center; padding-left: 0; background: rgba(0, 168, 255, 0.25); border-color: rgba(0, 168, 255, 0.6); }
         .spawn-overlay .menu-btn::before { display: none; }
 
-        /* 終極無限載入畫面 */
-        #character-loading-screen {
-            background-color: rgba(0, 0, 0, 0.7); 
-            z-index: 20; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8vh 0;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-        }
-
-        .char-section {
-            width: 90%;
-            max-width: 500px;
-            text-align: center;
-            background: rgba(20, 25, 35, 0.8);
-            border: 1px solid rgba(0, 168, 255, 0.2);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .char-section h3 {
-            color: #00a8ff;
-            margin-bottom: 15px;
-            letter-spacing: 4px;
-            border-bottom: 1px solid rgba(0,168,255,0.3);
-            padding-bottom: 10px;
-            font-size: 1.2rem;
-        }
-
-        .stat-line {
-            display: flex;
-            justify-content: space-between;
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-            padding: 0 20px;
-            color: #e0e0e0;
-        }
-
-        .stat-value { font-weight: bold; color: #fff; font-family: monospace; font-size: 1.15rem; }
-
-        .trait-box {
-            background: rgba(0,0,0,0.4);
-            padding: 12px 15px;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            border-left: 4px solid #ff4757;
-            text-align: left;
-        }
+        /* 終極無限載入畫面 (已改為左右排版) */
+        #character-loading-screen { background-color: rgba(0, 0, 0, 0.7); z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5vh 0; backdrop-filter: blur(8px); }
         
+        .char-split-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            gap: 40px;
+            width: 90%;
+            max-width: 1000px;
+            margin-bottom: 40px;
+        }
+
+        .char-section { width: 100%; text-align: center; background: rgba(20, 25, 35, 0.8); border: 1px solid rgba(0, 168, 255, 0.2); border-radius: 12px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .char-section h3 { color: #00a8ff; margin-bottom: 15px; letter-spacing: 4px; border-bottom: 1px solid rgba(0,168,255,0.3); padding-bottom: 10px; font-size: 1.2rem; }
+        .stat-line { display: flex; justify-content: space-between; font-size: 1.1rem; margin-bottom: 10px; padding: 0 20px; color: #e0e0e0; }
+        .stat-value { font-weight: bold; color: #fff; font-family: monospace; font-size: 1.15rem; }
+        .trait-box { background: rgba(0,0,0,0.4); padding: 12px 15px; border-radius: 6px; margin-bottom: 10px; border-left: 4px solid #ff4757; text-align: left; }
         .trait-box.good { border-left-color: #2ecc71; }
         .trait-box.neutral { border-left-color: #f1c40f; }
-
         .trait-box h4 { color: #fff; margin-bottom: 6px; letter-spacing: 1px; font-size: 1.05rem; }
         .trait-box p { color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.4; }
-
-        .char-bottom { text-align: center; margin-top: auto; }
+        .char-bottom { text-align: center; margin-top: 20px; }
         .char-bottom .pulse-text { font-size: 1.3rem; color: #00a8ff; margin-bottom: 8px; font-weight: bold; letter-spacing: 4px; animation: pulse 2s infinite; }
         .time-est { font-size: 0.9rem; color: rgba(255,255,255,0.5); font-family: monospace; letter-spacing: 1px; }
 
+        @media (max-width: 768px) {
+            .char-split-container { flex-direction: column; gap: 20px; }
+        }
+
         /* ==================== 登入專用全新面板樣式 ==================== */
-        .screen .login-panel-transparent {
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-            opacity: 0;
-            transition: opacity 0.5s ease, transform 0.5s ease;
-        }
+        .screen .login-panel-transparent { background: transparent !important; border: none !important; box-shadow: none !important; backdrop-filter: none !important; opacity: 0; transition: opacity 0.5s ease, transform 0.5s ease; }
+        #login-character-screen.active .left-panel-container.login-panel-transparent { opacity: 1; transform: translateX(0); }
+        #login-character-screen.active .right-panel-container.login-panel-transparent { opacity: 1; transform: translateY(-50%) translateX(0); pointer-events: auto; }
+        .login-value-text { font-size: 1.05rem; color: #ffffff; font-weight: bold; text-shadow: 0 2px 8px #000, 0 0 4px #000; }
+        .login-ach-item { display: flex; flex-direction: column; background: rgba(255, 255, 255, 0.05); padding: 12px 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 8px; text-shadow: 0 2px 6px #000; }
+        .login-ach-title { font-size: 1.05rem; font-weight: bold; margin-bottom: 4px; letter-spacing: 1px; }
+        .login-ach-desc { font-size: 0.85rem; color: rgba(255, 255, 255, 0.75); line-height: 1.4; }
 
-        #login-character-screen.active .left-panel-container.login-panel-transparent {
-            opacity: 1;
-            transform: translateX(0);
+        /* 任務管理按鈕 (頂部置中) */
+        .top-mission-btn {
+            position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(90deg, rgba(0,168,255,0.2), rgba(0,124,179,0.4));
+            border: 1px solid #00a8ff; color: white; padding: 10px 35px; border-radius: 25px;
+            font-size: 1.1rem; font-weight: bold; letter-spacing: 4px; cursor: pointer;
+            backdrop-filter: blur(5px); box-shadow: 0 0 15px rgba(0, 168, 255, 0.4);
+            z-index: 15; transition: all 0.2s ease; opacity: 0; pointer-events: none;
         }
-
-        #login-character-screen.active .right-panel-container.login-panel-transparent {
-            opacity: 1;
-            transform: translateY(-50%) translateX(0);
-            pointer-events: auto;
-        }
-
-        .login-value-text {
-            font-size: 1.05rem;
-            color: #ffffff;
-            font-weight: bold;
-            text-shadow: 0 2px 8px #000, 0 0 4px #000;
-        }
-
-        /* 登入隨機成就項目 */
-        .login-ach-item {
-            display: flex;
-            flex-direction: column;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 12px 14px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 8px;
-            text-shadow: 0 2px 6px #000;
-        }
-
-        .login-ach-title {
-            font-size: 1.05rem;
-            font-weight: bold;
-            margin-bottom: 4px;
-            letter-spacing: 1px;
-        }
-
-        .login-ach-desc {
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.75);
-            line-height: 1.4;
-        }
+        #login-character-screen.active .top-mission-btn { opacity: 1; pointer-events: auto; }
+        .top-mission-btn:hover { background: #00a8ff; box-shadow: 0 0 25px #00a8ff; }
 
         /* 登入畫面底部排版 - 左右水平對齊 */
-        .login-bottom-wrapper {
-            position: absolute;
-            bottom: 4%;
-            left: 8vw;
-            width: 84vw;
-            display: flex;
-            flex-direction: row;        
-            justify-content: space-between; 
-            align-items: center;        
-            z-index: 15;
-        }
+        .login-bottom-wrapper { position: absolute; bottom: 4%; left: 8vw; width: 84vw; display: flex; flex-direction: row; justify-content: space-between; align-items: center; z-index: 15; }
+        .login-dynamic-tips { font-size: 1.15rem; color: #00a8ff; font-weight: bold; letter-spacing: 1px; text-shadow: 0 2px 10px #000, 0 0 8px rgba(0, 168, 255, 0.6); animation: pulse 2.5s infinite; min-height: 1.8rem; text-align: right; max-width: 50vw; }
+        .login-sleep-status { font-size: 1.5rem; color: #ffffff; font-weight: 900; letter-spacing: 3px; text-shadow: 0 2px 12px #000, 0 0 6px #000; text-align: left; }
+        
+        /* 任務系統 Popup 全螢幕 */
+        /* ===== 替換此段：任務系統 Popup 全螢幕 ===== */
+        .mission-modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); z-index: 100; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .mission-modal-overlay.active { opacity: 1; pointer-events: auto; }
+        
+        /* 加入 overflow: hidden 避免整個彈窗垂直滾動 */
+        .mission-modal-content { position: relative; width: 92vw; height: 90vh; max-width: 1200px; background: rgba(15, 20, 30, 0.9); border: 1px solid rgba(0, 168, 255, 0.4); border-radius: 12px; display: flex; flex-direction: column; box-shadow: 0 0 40px rgba(0, 168, 255, 0.2); padding: 15px 20px; transform: scale(0.95); transition: transform 0.3s ease; overflow: hidden; }
+        .mission-modal-overlay.active .mission-modal-content { transform: scale(1); }
+        .close-mission-btn { position: absolute; top: 12px; right: 20px; font-size: 2rem; color: rgba(255,255,255,0.6); cursor: pointer; transition: color 0.2s; line-height: 1; z-index: 10; }
+        .close-mission-btn:hover { color: #ff4757; }
+        
+        /* 縮小主標題與間距 */
+        .mission-header-title { font-size: 1.4rem; color: #00a8ff; font-weight: bold; letter-spacing: 4px; margin-bottom: 8px; text-align: center; border-bottom: 1px solid rgba(0,168,255,0.3); padding-bottom: 8px; flex-shrink: 0; }
 
-        .login-dynamic-tips {
-            font-size: 1.15rem;
-            color: #00a8ff;
-            font-weight: bold;
-            letter-spacing: 1px;
-            text-shadow: 0 2px 10px #000, 0 0 8px rgba(0, 168, 255, 0.6);
-            animation: pulse 2.5s infinite;
-            min-height: 1.8rem;
-            text-align: right;          
-            max-width: 50vw;
-        }
+        /* 縮小「進行中 / 開始任務」字體，並強制不壓縮 */
+        .mission-row-title { font-size: 1rem; color: #fff; margin-top: 4px; margin-bottom: 6px; letter-spacing: 2px; flex-shrink: 0; }
+        
+        /* 橫向滾動容器：加入 flex-grow 與 min-height 完美適應橫屏剩餘空間 */
+        .mission-horizontal-list { display: flex; flex-direction: row; overflow-x: auto; gap: 12px; padding-bottom: 6px; margin-bottom: 6px; scroll-snap-type: x mandatory; flex-grow: 1; min-height: 0; align-items: flex-start; }
+        .mission-horizontal-list::-webkit-scrollbar { height: 6px; }
+        .mission-horizontal-list::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 3px; }
+        .mission-horizontal-list::-webkit-scrollbar-thumb { background: rgba(0,168,255,0.5); border-radius: 3px; }
 
-        .login-sleep-status {
-            font-size: 1.5rem;
-            color: #ffffff;
-            font-weight: 900;
-            letter-spacing: 3px;
-            text-shadow: 0 2px 12px #000, 0 0 6px #000;
-            text-align: left;           
-        }
-        /* ============================================================= */
+        /* 卡片 Scale Down 與 Compact 化 */
+        .mission-card { min-width: 210px; max-width: 240px; background: linear-gradient(135deg, rgba(30,40,55,1), rgba(20,25,35,1)); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; flex-shrink: 0; display: flex; flex-direction: column; scroll-snap-align: start; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; max-height: 100%; overflow-y: auto; }
+        .mission-card::-webkit-scrollbar { width: 3px; }
+        .mission-card:hover:not(.greyed-out) { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,168,255,0.3); border-color: rgba(0,168,255,0.6); }
+        .mission-card h4 { font-size: 1.05rem; color: #00a8ff; margin-bottom: 4px; flex-shrink: 0; }
+        .mission-card p.desc { font-size: 0.8rem; color: #ccc; margin-bottom: 8px; flex-grow: 1; line-height: 1.3; }
+        .mission-card .reward { font-size: 0.85rem; font-weight: bold; color: #2ecc71; margin-bottom: 6px; flex-shrink: 0; }
+        .mission-card .attempts { font-size: 0.75rem; color: rgba(255,255,255,0.5); font-family: monospace; text-align: right; flex-shrink: 0; }
+        .mission-card .warning { background: rgba(255,71,87,0.15); border-left: 3px solid #ff4757; padding: 5px 8px; font-size: 0.75rem; color: #ff4757; margin-top: 6px; border-radius: 4px; line-height: 1.2; flex-shrink: 0; }
 
+        .mission-card.greyed-out { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
+        .mission-empty { font-size: 0.85rem; color: rgba(255,255,255,0.4); font-style: italic; padding: 10px; width: 100%; text-align: center; }
         /* 自定義 Toast */
-        .toast-container {
-            position: fixed;
-            top: 30px;
-            right: 40px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            z-index: 9999;
-            pointer-events: none;
-            max-width: 360px;
-            width: calc(100% - 80px);
-        }
-
-        .toast {
-            background: linear-gradient(135deg, rgba(10, 20, 35, 0.9) 0%, rgba(5, 10, 15, 0.95) 100%);
-            color: #ffffff;
-            padding: 16px 20px;
-            border-radius: 8px;
-            backdrop-filter: blur(10px);
-            pointer-events: auto;
-            opacity: 0;
-            transform: translateX(40px);
-            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-            font-size: 0.9rem;
-            line-height: 1.5;
-            letter-spacing: 1px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
+        .toast-container { position: fixed; top: 30px; right: 40px; display: flex; flex-direction: column; gap: 12px; z-index: 9999; pointer-events: none; max-width: 360px; width: calc(100% - 80px); }
+        .toast { background: linear-gradient(135deg, rgba(10, 20, 35, 0.9) 0%, rgba(5, 10, 15, 0.95) 100%); color: #ffffff; padding: 16px 20px; border-radius: 8px; backdrop-filter: blur(10px); pointer-events: auto; opacity: 0; transform: translateX(40px); transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); font-size: 0.9rem; line-height: 1.5; letter-spacing: 1px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .toast.show { opacity: 1; transform: translateX(0); }
         .toast.info { border-left: 4px solid #00a8ff; border: 1px solid rgba(0, 168, 255, 0.25); box-shadow: 0 10px 25px rgba(0,0,0,0.5), 0 0 15px rgba(0, 168, 255, 0.1); }
+        .toast.warning { border-left: 4px solid #f1c40f; border: 1px solid rgba(241, 196, 15, 0.25); }
         .toast-header { font-weight: bold; font-size: 1rem; margin-bottom: 6px; letter-spacing: 1.5px; color: #00a8ff; }
+        .toast.warning .toast-header { color: #f1c40f; }
         .toast-body { color: rgba(255, 255, 255, 0.85); font-size: 0.85rem; }
 
         /* 關於彈出視窗 */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(6px);
-            z-index: 100;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.4s ease;
-        }
-
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(6px); z-index: 100; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-content {
-            background: linear-gradient(135deg, rgba(25, 35, 50, 0.85) 0%, rgba(10, 15, 25, 0.95) 100%);
-            border: 1px solid rgba(0, 168, 255, 0.3);
-            width: 85%;
-            max-width: 440px;
-            border-radius: 12px;
-            padding: 25px;
-            transform: scale(0.85) translateY(10px);
-            transition: transform 0.4s ease;
-            text-align: center;
-        }
-
+        .modal-content { background: linear-gradient(135deg, rgba(25, 35, 50, 0.85) 0%, rgba(10, 15, 25, 0.95) 100%); border: 1px solid rgba(0, 168, 255, 0.3); width: 85%; max-width: 440px; border-radius: 12px; padding: 25px; transform: scale(0.85) translateY(10px); transition: transform 0.4s ease; text-align: center; }
         .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
         .modal-header { font-size: 1.5rem; font-weight: bold; color: #00a8ff; margin-bottom: 5px; letter-spacing: 2px; }
         .modal-version { font-size: 0.8rem; color: rgba(255, 255, 255, 0.5); font-family: monospace; margin-bottom: 25px; display: block; }
@@ -678,16 +248,9 @@
             .content-list { max-height: 42vh; gap: 8px; margin-bottom: 10px; }
             .server-name { font-size: 0.85rem; }
             .toast-container { top: auto; bottom: 20px; right: 20px; max-width: 320px; }
-            .char-section { padding: 10px 20px; margin-bottom: 10px; }
-            .stat-line { margin-bottom: 5px; font-size: 0.95rem; }
-            .trait-box { padding: 8px 12px; margin-bottom: 6px; }
-            .spawn-overlay { padding: 10px 20px; width: 280px; }
-            .spawn-title { font-size: 1.5rem; }
-            .spawn-location { font-size: 1.2rem; margin-bottom: 5px; }
-            .spawn-desc { font-size: 0.8rem; margin-bottom: 15px; }
             .login-sleep-status { font-size: 1.15rem; }
             .login-dynamic-tips { font-size: 0.95rem; }
-        }
+            .top-mission-btn { top: 15px; padding: 8px 25px; font-size: 0.95rem; }
     </style>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -699,7 +262,6 @@
         <canvas id="three-canvas"></canvas>
     </div>
     <div class="bg-overlay"></div>
-
     <div id="toast-container" class="toast-container"></div>
 
     <div id="init-screen" class="screen active" onclick="tryStartGame()">
@@ -735,48 +297,13 @@
             <div class="page-subtitle">SERVER SELECTION</div>
             
             <div class="content-list">
-                <div class="list-item server-item" onclick="showServerToast()">
-                    <div class="server-info">
-                        <span class="server-name">亞洲區 (Asia)</span>
-                        <span class="server-players">在線人數：47.5 億玩家</span>
-                    </div>
-                </div>
-                <div class="list-item server-item" onclick="showServerToast()">
-                    <div class="server-info">
-                        <span class="server-name">歐洲區 (Europe)</span>
-                        <span class="server-players">在線人數：7.4 億玩家</span>
-                    </div>
-                </div>
-                <div class="list-item server-item" onclick="showServerToast()">
-                    <div class="server-info">
-                        <span class="server-name">北美洲區 (North America)</span>
-                        <span class="server-players">在線人數：3.8 億玩家</span>
-                    </div>
-                </div>
-                <div class="list-item server-item" onclick="showServerToast()">
-                    <div class="server-info">
-                        <span class="server-name" style="color: #ff4757;">非洲區 (Africa)</span>
-                        <span class="server-players">在線人數：14.0 億玩家</span>
-                    </div>
-                </div>
-                <div class="list-item server-item" onclick="showServerToast()">
-                    <div class="server-info">
-                        <span class="server-name">南美洲區 (South America)</span>
-                        <span class="server-players">在線人數：4.4 億玩家</span>
-                    </div>
-                </div>
-                <div class="list-item server-item" onclick="showServerToast()">
-                    <div class="server-info">
-                        <span class="server-name">大洋洲區 (Oceania)</span>
-                        <span class="server-players">在線人數：0.45 億玩家</span>
-                    </div>
-                </div>
-                <div class="list-item server-item" onclick="showServerToast()">
-                    <div class="server-info">
-                        <span class="server-name" style="color: #00a8ff;">南極洲區 (Antarctica)</span>
-                        <span class="server-players">在線人數：4000 玩家</span>
-                    </div>
-                </div>
+                <div class="list-item server-item" onclick="showServerToast()"><div class="server-info"><span class="server-name">亞洲區 (Asia)</span><span class="server-players">在線人數：47.5 億玩家</span></div></div>
+                <div class="list-item server-item" onclick="showServerToast()"><div class="server-info"><span class="server-name">歐洲區 (Europe)</span><span class="server-players">在線人數：7.4 億玩家</span></div></div>
+                <div class="list-item server-item" onclick="showServerToast()"><div class="server-info"><span class="server-name">北美洲區 (North America)</span><span class="server-players">在線人數：3.8 億玩家</span></div></div>
+                <div class="list-item server-item" onclick="showServerToast()"><div class="server-info"><span class="server-name" style="color: #ff4757;">非洲區 (Africa)</span><span class="server-players">在線人數：14.0 億玩家</span></div></div>
+                <div class="list-item server-item" onclick="showServerToast()"><div class="server-info"><span class="server-name">南美洲區 (South America)</span><span class="server-players">在線人數：4.4 億玩家</span></div></div>
+                <div class="list-item server-item" onclick="showServerToast()"><div class="server-info"><span class="server-name">大洋洲區 (Oceania)</span><span class="server-players">在線人數：0.45 億玩家</span></div></div>
+                <div class="list-item server-item" onclick="showServerToast()"><div class="server-info"><span class="server-name" style="color: #00a8ff;">南極洲區 (Antarctica)</span><span class="server-players">在線人數：4000 玩家</span></div></div>
             </div>
             <div class="back-btn" onclick="navigateTo('menu-screen')">返回主選單</div>
         </div>
@@ -797,22 +324,11 @@
         <div class="left-panel-container">
             <h2 class="page-header">控制台設定</h2>
             <div class="page-subtitle">SYSTEM SETTINGS</div>
-            
             <div class="content-list">
-                <div class="list-item">
-                    <span class="setting-label">分辨率 (Resolution)</span>
-                    <span class="setting-value-locked">隨機 (不可改)</span>
-                </div>
-                <div class="list-item">
-                    <span class="setting-label">語言 (Language)</span>
-                    <span class="setting-value-locked">地區鎖定 (不可改)</span>
-                </div>
-                <div class="list-item">
-                    <span class="setting-label">音量 (Volume)</span>
-                    <span class="setting-value-locked">隨機 (不可改)</span>
-                </div>
+                <div class="list-item"><span class="setting-label">分辨率 (Resolution)</span><span class="setting-value-locked">隨機 (不可改)</span></div>
+                <div class="list-item"><span class="setting-label">語言 (Language)</span><span class="setting-value-locked">地區鎖定 (不可改)</span></div>
+                <div class="list-item"><span class="setting-label">音量 (Volume)</span><span class="setting-value-locked">隨機 (不可改)</span></div>
             </div>
-            
             <p class="notice-text" style="font-size: 0.75rem; color: rgba(255,255,255,0.35); margin-bottom: 15px;">※ 系統提示：本伺服器核心參數由初始因果律全體鎖定，凡人玩家無修改權限。</p>
             <div class="back-btn" onclick="navigateTo('menu-screen')">返回主選單</div>
         </div>
@@ -832,16 +348,16 @@
     </div>
 
     <div id="character-loading-screen" class="screen">
-        <div class="char-section">
-            <h3>角色屬性</h3>
-            <div id="char-stats"></div>
+        <div class="char-split-container">
+            <div class="char-section">
+                <h3>角色屬性</h3>
+                <div id="char-stats"></div>
+            </div>
+            <div class="char-section">
+                <h3>角色特質</h3>
+                <div id="char-traits"></div>
+            </div>
         </div>
-        
-        <div class="char-section">
-            <h3>角色特質</h3>
-            <div id="char-traits"></div>
-        </div>
-
         <div class="char-bottom">
             <div class="pulse-text">角色正在載入</div>
             <div class="time-est">預計載入時間: 3年</div>
@@ -849,6 +365,9 @@
     </div>
 
     <div id="login-character-screen" class="screen">
+        
+        <button class="top-mission-btn" onclick="openMissionManager()">任務管理</button>
+
         <div class="left-panel-container login-panel-transparent">
             <h2 class="page-header">角色資訊</h2>
             <div class="page-subtitle">CHARACTER PROFILE</div>
@@ -869,8 +388,7 @@
         <div class="right-panel-container login-panel-transparent">
             <h2 class="page-header">解鎖成就</h2>
             <div class="page-subtitle">UNLOCKED ACHIEVEMENTS</div>
-            <div class="content-list" id="login-achievements-list" style="max-height: 55vh; overflow-y: auto;">
-                </div>
+            <div class="content-list" id="login-achievements-list" style="max-height: 55vh; overflow-y: auto;"></div>
         </div>
 
         <div class="login-bottom-wrapper">
@@ -878,11 +396,26 @@
             <div id="login-tips-area" class="login-dynamic-tips">珍惜只有一次的遊玩地球Online的機會</div>
         </div>
     </div>
+
+    <div id="mission-modal" class="mission-modal-overlay" onclick="closeModalOnOverlay(event, 'mission-modal')">
+        <div class="mission-modal-content">
+            <div class="close-mission-btn" onclick="closeModal('mission-modal')">×</div>
+            <div class="mission-header-title">任務管理</div>
+            
+            <div class="mission-row-title">進行中</div>
+            <div class="mission-horizontal-list" id="in-progress-list">
+                </div>
+
+            <div class="mission-row-title">開始任務 (可選)</div>
+            <div class="mission-horizontal-list" id="available-list">
+                </div>
+        </div>
+    </div>
     
     <div id="aboutModal" class="modal-overlay" onclick="closeModalOnOverlay(event, 'aboutModal')">
         <div class="modal-content">
             <div class="modal-header">關於 地球online</div>
-            <span class="modal-version">SYSTEM VERSION v2026.6 (Dynamic JSON Engine)</span>
+            <span class="modal-version">SYSTEM VERSION v2026.7 (Mission System)</span>
             <div class="about-body">
                 <p style="font-weight: bold;">一款依賴運氣的 3D 開放式世界遊戲</p>
                 <p>擁有 <span style="color: #00a8ff; font-weight: bold;">80億</span> 同時在線玩家</p>
@@ -892,271 +425,156 @@
     </div>
 
     <script>
-        // ==================== 1. 設定全域變數與預設值 (Fallback) ====================
-        // 如果玩家無法連上 GitHub JSON，會使用以下預設值確保遊戲不崩潰。
-
-        let loadingTipsData = [
-            "這是一個依賴運氣遊戲",
-            "新手教程需時十八年",
-            "拍拖副本為高難度副本",
-            "保持理智值是生存的其中一個好祕訣"
-        ];
-
-        let waitingTipsData = [
-            "使用飛機可以切換伺服器",
-            "如身體任何模塊血量過低可以尋找醫生NPC",
-            "珍惜只有一次的遊玩地球Online的機會"
-        ];
-
+        // ==================== 1. JSON Fallback Data ====================
+        let loadingTipsData = ["這是一個依賴運氣遊戲", "新手教程需時十八年", "拍拖副本為高難度副本", "保持理智值是生存的其中一個好祕訣"];
+        let waitingTipsData = ["使用飛機可以切換伺服器", "如身體任何模塊血量過低可以尋找醫生NPC", "珍惜只有一次的遊玩地球Online的機會"];
+        
         let traitsData = [
             { id: "adhd", title: "ADHD", desc: "隨機移動,有機會中途突然彈出小遊戲", prob: 0.15, type: "neutral" },
-            { id: "asd", title: "ASD", desc: "不提供原裝社交潛規則理解系統,有高機會在專業副本如「航空」,「巴士」等等提前獲得資訊", prob: 0.13, type: "good" },
+            { id: "asd", title: "ASD", desc: "不提供原裝社交潛規則理解系統,有高機會在專業副本提前獲得資訊", prob: 0.13, type: "good" },
             { id: "asian_parent", title: "亞洲家長", desc: "地獄難度", prob: 0.10, type: "" }
         ];
 
         let achievementsData = [
             { id: "school_run", title: "「放學快綫」", desc: "「放學即彈射走佬,極速歸家」", prob: 0.13, color: "#ffea00" },
-            { id: "undead", title: "「不死之身」", desc: "「重傷/致命意外中生還」", prob: 0.03, color: "#ffffff" },
-            { id: "plane_fan", title: "「邊度有飛機」", desc: "「成為飛機迷」", prob: 0.08, color: "#00b0ff" },
-            { id: "special_plane", title: "「特別飛機 200 OK」", desc: "「成功影到一架特別飛機」", prob: 0.01, color: "#ffffff", conditional_on: "plane_fan", conditional_prob: 0.85 },
-            { id: "run_in_time", title: "「跑得切」", desc: "「在遲到前3秒內入校」", prob: 0.39, color: "#ffffff" },
-            { id: "typhoon", title: "「停課」", desc: "「感謝八號風球同紅雨」", prob: 0.99, color: "#ffffff" },
-            { id: "red_van", title: "「乘搭路上高鐵」", desc: "「搭過紅van」", prob: 0.35, color: "#ffffff" },
-            { id: "go_out", title: "「自主外出」", desc: "「可以自己一個人出街」", prob: 0.70, color: "#ffffff" },
-            { id: "night_out", title: "「自主夜出」", desc: "「可以自己一個人夜晚出街」", prob: 0.00, color: "#ffffff", conditional_on: "go_out", conditional_prob: 0.80 }
+            { id: "plane_fan", title: "「邊度有飛機」", desc: "「成為飛機迷」", prob: 0.08, color: "#00b0ff" }
         ];
 
-        // ==================== 2. 非同步抓取外部 JSON 資料 ====================
-        (async function fetchExternalData() {
-            try {
-                const tipsRes = await fetch('https://raw.githubusercontent.com/a330900neo/EarthOnlinememe/main/tips.json');
-                if (tipsRes.ok) {
-                    const tipsJson = await tipsRes.json();
-                    if (tipsJson.loadingTips) loadingTipsData = tipsJson.loadingTips;
-                    if (tipsJson.waitingTips) waitingTipsData = tipsJson.waitingTips;
-                }
-            } catch (e) {
-                console.log('無法抓取 tips.json，將使用預設設定。');
+        let missionsData = [
+            {
+                "id": "dating",
+                "name": "拍拖",
+                "desc": "找一位異性朋友",
+                "reward": "社交能力+9",
+                "max_attempts": 4,
+                "random_done_min": 0,
+                "random_done_max": 2,
+                "in_progress_prob": 0.20,
+                "force_zero_condition": "love === 'A0'",
+                "warning_condition": "love === 'A0' || love.startsWith('A3')",
+                "warning_text": "⚠角色可能沒有足夠社交能力,社交能量,經濟能力或欲望"
+            },
+            {
+                "id": "f1_school",
+                "name": "一級方程式放學",
+                "desc": "放學到校門破1:00",
+                "reward": "體質+5 反應+7",
+                "max_attempts": 5,
+                "random_done_min": 0,
+                "random_done_max": 5,
+                "force_max_done_condition": "achievements.includes('school_run')",
+                "in_progress_prob": 0.33,
+                "warning_condition": "false",
+                "warning_text": ""
+            },
+            {
+                "id": "run_10k",
+                "name": "10km",
+                "desc": "連續跑10km",
+                "reward": "體質+8",
+                "max_attempts": 6,
+                "random_done_min": 0,
+                "random_done_max": 6,
+                "in_progress_prob": 0.30,
+                "warning_condition": "constitution < 60",
+                "warning_text": "⚠量力而為"
+            },
+            {
+                "id": "bus_guide",
+                "name": "路線指路",
+                "desc": "在巴士司機迷路時指路",
+                "reward": "空間感+8 空間記憶 +25",
+                "max_attempts": 3,
+                "random_done_min": 0,
+                "random_done_max": 3,
+                "in_progress_prob": 0.05,
+                "warning_condition": "false",
+                "warning_text": ""
             }
+        ];
 
-            try {
-                const atRes = await fetch('https://raw.githubusercontent.com/a330900neo/EarthOnlinememe/main/achievementtrait.json');
-                if (atRes.ok) {
-                    const atJson = await atRes.json();
-                    if (atJson.traits) traitsData = atJson.traits;
-                    if (atJson.achievements) achievementsData = atJson.achievements;
-                }
-            } catch (e) {
-                console.log('無法抓取 achievementtrait.json，將使用預設設定。');
-            }
+        // ==================== 2. Fetch Data ====================
+        (async function fetchExternalData() {
+            try { const r = await fetch('https://raw.githubusercontent.com/a330900neo/EarthOnlinememe/main/tips.json'); if(r.ok) { const j = await r.json(); if(j.loadingTips) loadingTipsData = j.loadingTips; if(j.waitingTips) waitingTipsData = j.waitingTips; } } catch(e){}
+            try { const r = await fetch('https://raw.githubusercontent.com/a330900neo/EarthOnlinememe/main/achievementtrait.json'); if(r.ok) { const j = await r.json(); if(j.traits) traitsData = j.traits; if(j.achievements) achievementsData = j.achievements; } } catch(e){}
+            try { const r = await fetch('https://raw.githubusercontent.com/a330900neo/EarthOnlinememe/main/missions.json'); if(r.ok) { const j = await r.json(); if(j.missions) missionsData = j.missions; } } catch(e){}
         })();
 
+        // ==================== 3. 遊戲全域狀態 (角色與任務) ====================
+        let playerContext = {
+            gender: '男', wealth: 0, constitution: 100, years: 18, love: 'A0', achievements: []
+        };
+        let activeMissions = [];
+
         // --- Three.js ---
-        let scene, camera, renderer, controls;
-        let earth, clouds;
-        
-        let earthMode = 'menu'; 
-        let targetRotation = { x: 0, y: 0 };
-        let targetCameraZ = 250;
-        let currentEarthSpeed = 0.0008;
+        let scene, camera, renderer, controls, earth, clouds;
+        let earthMode = 'menu'; let targetRotation = { x: 0, y: 0 }; let targetCameraZ = 250; let currentEarthSpeed = 0.0008;
 
         function init3DEarth() {
             const canvas = document.getElementById('three-canvas');
-            scene = new THREE.Scene();
-
-            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.z = 250;
-
-            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            
-            renderer.toneMapping = THREE.ACESFilmicToneMapping;
-            renderer.toneMappingExposure = 1.1; 
-
-            const textureLoader = new THREE.TextureLoader();
-            const dayTexture = textureLoader.load('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
-            const nightTexture = textureLoader.load('https://unpkg.com/three-globe/example/img/earth-night.jpg');
-            const cloudTexture = textureLoader.load('https://unpkg.com/three-globe/example/img/earth-clouds.png');
-
-            const sunDir = new THREE.Vector3(1, 0.4, 1).normalize();
-            const sunLight = new THREE.DirectionalLight(0xffffff, 3.5); 
-            sunLight.position.copy(sunDir).multiplyScalar(300);
-            scene.add(sunLight);
-            scene.add(new THREE.AmbientLight(0xffffff, 0.005)); 
-
-            const earthGeo = new THREE.SphereGeometry(60, 64, 64);
-            const earthMat = new THREE.MeshLambertMaterial({ map: dayTexture });
-            earth = new THREE.Mesh(earthGeo, earthMat);
-            scene.add(earth);
-
-            const nightMat = new THREE.ShaderMaterial({
-                uniforms: { nightTex: { value: nightTexture }, sunDirection: { value: sunDir } },
-                vertexShader: `varying vec2 vUv; varying vec3 vNormal; void main() { vUv = uv; vNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-                fragmentShader: `uniform sampler2D nightTex; uniform vec3 sunDirection; varying vec2 vUv; varying vec3 vNormal; void main() { vec4 nightColor = texture2D(nightTex, vUv); float intensity = dot(vNormal, sunDirection); float alpha = smoothstep(0.15, -0.2, intensity); gl_FragColor = vec4(nightColor.rgb * 2.5, alpha); }`,
-                transparent: true, blending: THREE.AdditiveBlending
-            });
-            const nightSphere = new THREE.Mesh(earthGeo, nightMat);
-            nightSphere.scale.set(1.002, 1.002, 1.002);
-            earth.add(nightSphere); 
-
-            const cloudGeo = new THREE.SphereGeometry(60.5, 64, 64);
-            const cloudMat = new THREE.MeshLambertMaterial({ map: cloudTexture, transparent: true, opacity: 0.7, blending: THREE.NormalBlending });
-            clouds = new THREE.Mesh(cloudGeo, cloudMat);
-            earth.add(clouds);
-
-            const atmosGeo = new THREE.SphereGeometry(60, 64, 64);
-            const atmosMat = new THREE.ShaderMaterial({
-                vertexShader: `varying vec3 vNormal; void main() { vNormal = normalize(normalMatrix * normal); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-                fragmentShader: `varying vec3 vNormal; void main() { float intensity = pow(max(0.0, 0.58 - dot(vNormal, vec3(0.0, 0.0, 1.0))), 2.2); gl_FragColor = vec4(0.3, 0.6, 1.0, 1.0) * intensity * 2.0; }`,
-                blending: THREE.AdditiveBlending, side: THREE.BackSide, transparent: true
-            });
-            const atmosSphere = new THREE.Mesh(atmosGeo, atmosMat);
-            atmosSphere.scale.set(1.16, 1.16, 1.16);
-            scene.add(atmosSphere);
-
-            controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;       
-            controls.dampingFactor = 0.05;
-            controls.enablePan = false;          
-            controls.minDistance = 90;           
-            controls.maxDistance = 350;          
-
-            controls.addEventListener('start', () => { if(earthMode === 'menu') earthMode = 'manual'; });
-
+            scene = new THREE.Scene(); camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000); camera.position.z = 250;
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true }); renderer.setSize(window.innerWidth, window.innerHeight); renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.1; 
+            const textureLoader = new THREE.TextureLoader(); const dayTexture = textureLoader.load('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg'); const nightTexture = textureLoader.load('https://unpkg.com/three-globe/example/img/earth-night.jpg'); const cloudTexture = textureLoader.load('https://unpkg.com/three-globe/example/img/earth-clouds.png');
+            const sunDir = new THREE.Vector3(1, 0.4, 1).normalize(); const sunLight = new THREE.DirectionalLight(0xffffff, 3.5); sunLight.position.copy(sunDir).multiplyScalar(300); scene.add(sunLight); scene.add(new THREE.AmbientLight(0xffffff, 0.005)); 
+            const earthGeo = new THREE.SphereGeometry(60, 64, 64); const earthMat = new THREE.MeshLambertMaterial({ map: dayTexture }); earth = new THREE.Mesh(earthGeo, earthMat); scene.add(earth);
+            const nightMat = new THREE.ShaderMaterial({ uniforms: { nightTex: { value: nightTexture }, sunDirection: { value: sunDir } }, vertexShader: `varying vec2 vUv; varying vec3 vNormal; void main() { vUv = uv; vNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`, fragmentShader: `uniform sampler2D nightTex; uniform vec3 sunDirection; varying vec2 vUv; varying vec3 vNormal; void main() { vec4 nightColor = texture2D(nightTex, vUv); float intensity = dot(vNormal, sunDirection); float alpha = smoothstep(0.15, -0.2, intensity); gl_FragColor = vec4(nightColor.rgb * 2.5, alpha); }`, transparent: true, blending: THREE.AdditiveBlending });
+            const nightSphere = new THREE.Mesh(earthGeo, nightMat); nightSphere.scale.set(1.002, 1.002, 1.002); earth.add(nightSphere); 
+            const cloudGeo = new THREE.SphereGeometry(60.5, 64, 64); const cloudMat = new THREE.MeshLambertMaterial({ map: cloudTexture, transparent: true, opacity: 0.7, blending: THREE.NormalBlending }); clouds = new THREE.Mesh(cloudGeo, cloudMat); earth.add(clouds);
+            const atmosGeo = new THREE.SphereGeometry(60, 64, 64); const atmosMat = new THREE.ShaderMaterial({ vertexShader: `varying vec3 vNormal; void main() { vNormal = normalize(normalMatrix * normal); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`, fragmentShader: `varying vec3 vNormal; void main() { float intensity = pow(max(0.0, 0.58 - dot(vNormal, vec3(0.0, 0.0, 1.0))), 2.2); gl_FragColor = vec4(0.3, 0.6, 1.0, 1.0) * intensity * 2.0; }`, blending: THREE.AdditiveBlending, side: THREE.BackSide, transparent: true }); const atmosSphere = new THREE.Mesh(atmosGeo, atmosMat); atmosSphere.scale.set(1.16, 1.16, 1.16); scene.add(atmosSphere);
+            controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.dampingFactor = 0.05; controls.enablePan = false; controls.minDistance = 90; controls.maxDistance = 350; controls.addEventListener('start', () => { if(earthMode === 'menu') earthMode = 'manual'; });
             animate();
         }
 
         function animate() {
             requestAnimationFrame(animate);
-
             if (clouds) clouds.rotation.y += 0.00018;
-
-            if (earthMode === 'menu') {
-                earth.rotation.y += currentEarthSpeed;
-            } else if (earthMode === 'reincarnating') {
-                earth.rotation.y += currentEarthSpeed;
-            } else if (earthMode === 'focusing') {
-                earth.rotation.x += (targetRotation.x - earth.rotation.x) * 0.05;
-                earth.rotation.y += (targetRotation.y - earth.rotation.y) * 0.05;
-            }
-
-            if (Math.abs(camera.position.z - targetCameraZ) > 0.5) {
-                camera.position.z += (targetCameraZ - camera.position.z) * 0.03;
-            }
-
-            controls.update();
-            renderer.render(scene, camera);
+            if (earthMode === 'menu' || earthMode === 'reincarnating') earth.rotation.y += currentEarthSpeed;
+            else if (earthMode === 'focusing') { earth.rotation.x += (targetRotation.x - earth.rotation.x) * 0.05; earth.rotation.y += (targetRotation.y - earth.rotation.y) * 0.05; }
+            if (Math.abs(camera.position.z - targetCameraZ) > 0.5) camera.position.z += (targetCameraZ - camera.position.z) * 0.03;
+            controls.update(); renderer.render(scene, camera);
         }
 
         window.addEventListener('resize', () => {
-            if (camera && renderer) {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            }
-            const isPortrait = window.innerHeight > window.innerWidth;
-            if (document.getElementById('init-screen').classList.contains('active')) {
-                document.querySelector('.orientation-warning').style.display = isPortrait ? 'block' : 'none';
-            }
+            if (camera && renderer) { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); }
+            const isPortrait = window.innerHeight > window.innerWidth; if (document.getElementById('init-screen').classList.contains('active')) document.querySelector('.orientation-warning').style.display = isPortrait ? 'block' : 'none';
         });
 
-        // --- 流程控制 ---
+        // --- 遊戲流程 ---
         function tryStartGame() {
-            const docElm = document.documentElement;
-            if (docElm.requestFullscreen) docElm.requestFullscreen();
-            else if (docElm.mozRequestFullScreen) docElm.mozRequestFullScreen();
-            else if (docElm.webkitRequestFullScreen) docElm.webkitRequestFullScreen();
-            else if (docElm.msRequestFullscreen) docElm.msRequestFullscreen();
-
-            document.getElementById('init-screen').classList.remove('active');
-            document.getElementById('loading-screen').classList.add('active');
-            
-            init3DEarth();
-            startLoadingSequence();
+            const docElm = document.documentElement; if (docElm.requestFullscreen) docElm.requestFullscreen(); else if (docElm.mozRequestFullScreen) docElm.mozRequestFullScreen(); else if (docElm.webkitRequestFullScreen) docElm.webkitRequestFullScreen(); else if (docElm.msRequestFullscreen) docElm.msRequestFullscreen();
+            document.getElementById('init-screen').classList.remove('active'); document.getElementById('loading-screen').classList.add('active'); init3DEarth(); startLoadingSequence();
         }
 
         function startLoadingSequence() {
-            const progressBar = document.getElementById('progressBar');
-            const progressStatus = document.getElementById('progressStatus');
-            const tips = document.getElementById('tips');
-            
-            let currentProgress = 0;
-            const totalDuration = 13000; 
-            const startTime = Date.now();
-
-            let tipIndex = 0;
-            // 套用 JSON 獲取的載入提示
-            tips.innerText = loadingTipsData[0] || "加載資料中...";
-            
-            const tipInterval = setInterval(() => {
-                tipIndex = (tipIndex + 1) % loadingTipsData.length;
-                tips.innerText = loadingTipsData[tipIndex];
-            }, 3000);
-
+            const progressBar = document.getElementById('progressBar'); const progressStatus = document.getElementById('progressStatus'); const tips = document.getElementById('tips');
+            let currentProgress = 0; const totalDuration = 13000; const startTime = Date.now(); let tipIndex = 0; tips.innerText = loadingTipsData[0] || "加載資料中...";
+            const tipInterval = setInterval(() => { tipIndex = (tipIndex + 1) % loadingTipsData.length; tips.innerText = loadingTipsData[tipIndex]; }, 3000);
             function updateProgress() {
                 const elapsedTime = Date.now() - startTime;
-                if (elapsedTime >= totalDuration) {
-                    currentProgress = 100;
-                    progressBar.style.width = currentProgress + '%';
-                    progressStatus.innerText = `LOADING... 100%`;
-                    clearInterval(tipInterval);
-                    setTimeout(goToMainMenu, 500); 
-                    return;
-                }
+                if (elapsedTime >= totalDuration) { currentProgress = 100; progressBar.style.width = '100%'; progressStatus.innerText = `LOADING... 100%`; clearInterval(tipInterval); setTimeout(goToMainMenu, 500); return; }
                 const idealProgress = (elapsedTime / totalDuration) * 100;
-                if (Math.random() > 0.45 || currentProgress === 0) {
-                    const jump = Math.random() * 8 + 1; 
-                    currentProgress = Math.min(currentProgress + jump, idealProgress + 8);
-                    if (currentProgress > 99 && elapsedTime < totalDuration - 500) currentProgress = 99;
-                    progressBar.style.width = currentProgress + '%';
-                    progressStatus.innerText = `LOADING... ${Math.floor(currentProgress)}%`;
-                }
+                if (Math.random() > 0.45 || currentProgress === 0) { const jump = Math.random() * 8 + 1; currentProgress = Math.min(currentProgress + jump, idealProgress + 8); if (currentProgress > 99 && elapsedTime < totalDuration - 500) currentProgress = 99; progressBar.style.width = currentProgress + '%'; progressStatus.innerText = `LOADING... ${Math.floor(currentProgress)}%`; }
                 setTimeout(updateProgress, Math.random() * 250 + 100);
             }
             updateProgress();
         }
 
-        function goToMainMenu() {
-            document.getElementById('loading-screen').classList.remove('active');
-            document.getElementById('menu-screen').classList.add('active');
-            document.getElementById('bgContainer').classList.add('shifted');
-        }
+        function goToMainMenu() { document.getElementById('loading-screen').classList.remove('active'); document.getElementById('menu-screen').classList.add('active'); document.getElementById('bgContainer').classList.add('shifted'); }
 
         let loginTipsInterval = null; 
-
         function navigateTo(targetScreenId) {
-            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-            document.getElementById(targetScreenId).classList.add('active');
-            
-            if (targetScreenId !== 'login-character-screen') {
-                if (loginTipsInterval) {
-                    clearInterval(loginTipsInterval);
-                    loginTipsInterval = null;
-                }
-            }
-
-            if (targetScreenId === 'menu-screen') {
-                earthMode = 'menu';
-                targetCameraZ = 250;
-            }
+            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active')); document.getElementById(targetScreenId).classList.add('active');
+            if (targetScreenId !== 'login-character-screen' && loginTipsInterval) { clearInterval(loginTipsInterval); loginTipsInterval = null; }
+            if (targetScreenId === 'menu-screen') { earthMode = 'menu'; targetCameraZ = 250; }
         }
 
-        function showServerToast() {
-            showToast('系統提示', '玩家不可以選擇伺服器,登入後隨機分配', 'info');
-        }
-
+        function showServerToast() { showToast('系統提示', '玩家不可以選擇伺服器,登入後隨機分配', 'info'); }
         function showToast(title, message, type = 'info') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
+            const container = document.getElementById('toast-container'); const toast = document.createElement('div'); toast.className = `toast ${type}`;
             toast.innerHTML = `<div class="toast-header">${title}</div><div class="toast-body">${message.replace(/\n/g, '<br>')}</div>`;
-            container.appendChild(toast);
-            setTimeout(() => { toast.classList.add('show'); }, 50);
-            setTimeout(() => {
-                toast.classList.remove('show');
-                toast.addEventListener('transitionend', () => { toast.remove(); });
-            }, 5000);
+            container.appendChild(toast); setTimeout(() => { toast.classList.add('show'); }, 50);
+            setTimeout(() => { toast.classList.remove('show'); toast.addEventListener('transitionend', () => { toast.remove(); }); }, 5000);
         }
 
         function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
@@ -1165,149 +583,169 @@
 
         // --- 註冊與投胎系統 ---
         let spawnTimeout;
-
         function startReincarnation() {
-            document.getElementById('bgContainer').classList.remove('shifted');
-            navigateTo('reincarnation-screen');
-            
-            earthMode = 'reincarnating';
-            currentEarthSpeed = 0.12; 
-
-            const waitTime = Math.floor(Math.random() * 25000) + 4000;
-            setTimeout(showSpawnPoint, waitTime);
+            document.getElementById('bgContainer').classList.remove('shifted'); navigateTo('reincarnation-screen');
+            earthMode = 'reincarnating'; currentEarthSpeed = 0.12; 
+            const waitTime = Math.floor(Math.random() * 25000) + 4000; setTimeout(showSpawnPoint, waitTime);
         }
 
         function showSpawnPoint() {
-            navigateTo('spawn-screen');
-            
-            earthMode = 'focusing';
-            targetRotation.x = 0.38; 
-            targetRotation.y = -3.5; 
-
-            targetCameraZ = 120;
-            
+            navigateTo('spawn-screen'); earthMode = 'focusing'; targetRotation.x = 0.38; targetRotation.y = -3.5; targetCameraZ = 120;
             spawnTimeout = setTimeout(goToCharacterLoading, 15000);
         }
 
         function goToCharacterLoading() {
-            clearTimeout(spawnTimeout);
-            navigateTo('character-loading-screen');
-            
-            const constitution = Math.floor(Math.random() * 51) + 50; 
-            const wealth = Math.floor(Math.random() * 90001) + 10000; 
-            const isMale = Math.random() > 0.5;
-
-            document.getElementById('char-stats').innerHTML = `
-                <div class="stat-line"><span>體質</span><span class="stat-value">${constitution} / 100</span></div>
-                <div class="stat-line"><span>家境(月入)</span><span class="stat-value">$${wealth.toLocaleString()} HKD</span></div>
-                <div class="stat-line"><span>性別</span><span class="stat-value">${isMale ? '男' : '女'}</span></div>
-            `;
-
-            // 利用外部 JSON 動態生成特質
+            clearTimeout(spawnTimeout); navigateTo('character-loading-screen');
+            const constitution = Math.floor(Math.random() * 51) + 50; const wealth = Math.floor(Math.random() * 90001) + 10000; const isMale = Math.random() > 0.5;
+            document.getElementById('char-stats').innerHTML = `<div class="stat-line"><span>體質</span><span class="stat-value">${constitution} / 100</span></div><div class="stat-line"><span>家境(月入)</span><span class="stat-value">$${wealth.toLocaleString()} HKD</span></div><div class="stat-line"><span>性別</span><span class="stat-value">${isMale ? '男' : '女'}</span></div>`;
             let traitsHtml = '';
-            traitsData.forEach(t => {
-                if (Math.random() <= t.prob) {
-                    traitsHtml += `<div class="trait-box ${t.type || ''}"><h4>${t.title}</h4><p>${t.desc}</p></div>`;
-                }
-            });
-
-            if (traitsHtml === '') {
-                traitsHtml = `<div class="trait-box" style="border-left-color: #888;"><h4>凡夫俗子</h4><p>沒有獲得任何特殊出廠設定，一切只能靠自己。</p></div>`;
-            }
-
+            traitsData.forEach(t => { if (Math.random() <= t.prob) traitsHtml += `<div class="trait-box ${t.type || ''}"><h4>${t.title}</h4><p>${t.desc}</p></div>`; });
+            if (traitsHtml === '') traitsHtml = `<div class="trait-box" style="border-left-color: #888;"><h4>凡夫俗子</h4><p>沒有獲得任何特殊出廠設定，一切只能靠自己。</p></div>`;
             document.getElementById('char-traits').innerHTML = traitsHtml;
         }
 
-        // --- 登入控制邏輯 ---
+        // ==================== 條件解析引擎 (Safe Evaluator) ====================
+        function evaluateCondition(condStr, ctx) {
+            if (!condStr || condStr.trim() === '' || condStr === 'false') return false;
+            try {
+                const keys = Object.keys(ctx); const vals = Object.values(ctx);
+                const func = new Function(...keys, `return ${condStr};`);
+                return func(...vals);
+            } catch(e) { console.error("評估條件失敗:", condStr, e); return false; }
+        }
+
+        // --- 登入邏輯與任務生成 ---
         function handleLogin() {
             navigateTo('login-character-screen');
-            
-            document.getElementById('bgContainer').classList.remove('shifted');
-            earthMode = 'menu'; 
-            targetCameraZ = 160;
+            document.getElementById('bgContainer').classList.remove('shifted'); earthMode = 'menu'; targetCameraZ = 160;
 
-            const isMale = Math.random() > 0.5;
-            document.getElementById('login-gender').innerText = isMale ? '男' : '女';
+            playerContext.gender = Math.random() > 0.5 ? '男' : '女';
+            playerContext.wealth = Math.floor(Math.random() * 90001) + 10000;
+            playerContext.constitution = Math.floor(Math.random() * 36) + 65;
+            playerContext.years = Math.floor(Math.random() * 5) + 14;
 
-            const wealth = Math.floor(Math.random() * 90001) + 10000;
-            document.getElementById('login-wealth').innerText = `$${wealth.toLocaleString()} HKD`;
-
+            document.getElementById('login-gender').innerText = playerContext.gender;
+            document.getElementById('login-wealth').innerText = `$${playerContext.wealth.toLocaleString()} HKD`;
             document.getElementById('login-region').innerText = '香港';
+            document.getElementById('login-constitution').innerText = `${playerContext.constitution} / 100`;
+            document.getElementById('login-years').innerText = `${playerContext.years} 年`;
 
-            const constitution = Math.floor(Math.random() * 36) + 65;
-            document.getElementById('login-constitution').innerText = `${constitution} / 100`;
-
-            const years = Math.floor(Math.random() * 5) + 14;
-            document.getElementById('login-years').innerText = `${years} 年`;
-
-            let loveStatus = 'A0';
-            const loveRoll = Math.random() * 100;
-            
+            let loveStatus = 'A0'; const loveRoll = Math.random() * 100;
             if (loveRoll < 75) { 
                 const a0Roll = Math.random() * 100;
-                if (a0Roll < 15) loveStatus = 'A380';
-                else if (a0Roll < 15 + 3) loveStatus = 'A350';
-                else if (a0Roll < 15 + 3 + 1.5) loveStatus = 'A340';
-                else if (a0Roll < 15 + 3 + 1.5 + 3.5) loveStatus = 'A330';
-                else if (a0Roll < 15 + 3 + 1.5 + 3.5 + 3.5) loveStatus = 'A320';
-                else if (a0Roll < 15 + 3 + 1.5 + 3.5 + 3.5 + 1.5) loveStatus = 'A321';
-                else if (a0Roll < 15 + 3 + 1.5 + 3.5 + 3.5 + 1.5 + 1) loveStatus = 'A319';
-                else if (a0Roll < 15 + 3 + 1.5 + 3.5 + 3.5 + 1.5 + 1 + 0.5) loveStatus = 'A318';
-                else if (a0Roll < 15 + 3 + 1.5 + 3.5 + 3.5 + 1.5 + 1 + 0.5 + 0.4) loveStatus = 'A310';
-                else loveStatus = 'A0';
-            } else if (loveRoll < 75 + 10) { 
-                loveStatus = 'A1'; 
-            } else if (loveRoll < 75 + 10 + 10) { 
-                loveStatus = 'A2'; 
-            } else { 
-                loveStatus = 'A3'; 
-            }
+                if (a0Roll < 15) loveStatus = 'A380'; else if (a0Roll < 18) loveStatus = 'A350'; else if (a0Roll < 19.5) loveStatus = 'A340'; else if (a0Roll < 23) loveStatus = 'A330'; else if (a0Roll < 26.5) loveStatus = 'A320'; else if (a0Roll < 28) loveStatus = 'A321'; else if (a0Roll < 29) loveStatus = 'A319'; else if (a0Roll < 29.5) loveStatus = 'A318'; else if (a0Roll < 29.9) loveStatus = 'A310'; else loveStatus = 'A0';
+            } else if (loveRoll < 85) loveStatus = 'A1'; else if (loveRoll < 95) loveStatus = 'A2'; else loveStatus = 'A3'; 
+            playerContext.love = loveStatus;
             document.getElementById('login-love').innerText = loveStatus;
 
-            // --- 利用外部 JSON 動態生成連動成就 ---
-            let earnedAchievements = [];
-            let unlockedIds = new Set();
-            
+            let earnedAchievements = []; playerContext.achievements = [];
             achievementsData.forEach(ach => {
                 let currentProb = ach.prob;
-                // 如果成就帶有條件，且該條件已經解鎖，則替換機率
-                if (ach.conditional_on && unlockedIds.has(ach.conditional_on)) {
-                    currentProb = ach.conditional_prob;
-                }
-                
-                if (Math.random() < currentProb) {
-                    unlockedIds.add(ach.id);
-                    earnedAchievements.push({ title: ach.title, desc: ach.desc, color: ach.color || '#ffffff' });
-                }
+                if (ach.conditional_on && playerContext.achievements.includes(ach.conditional_on)) currentProb = ach.conditional_prob;
+                if (Math.random() < currentProb) { playerContext.achievements.push(ach.id); earnedAchievements.push(ach); }
             });
-
             document.getElementById('login-achievements-count').innerText = `${earnedAchievements.length} 個`;
-
             const achListContainer = document.getElementById('login-achievements-list');
-            if (earnedAchievements.length === 0) {
-                achListContainer.innerHTML = `<div class="login-ach-item" style="color:rgba(255,255,255,0.4); text-align:center;">此角色過於平凡，未解鎖任何成就</div>`;
-            } else {
-                achListContainer.innerHTML = earnedAchievements.map(ach => `
-                    <div class="login-ach-item">
-                        <span class="login-ach-title" style="color: ${ach.color};">${ach.title}</span>
-                        <span class="login-ach-desc">${ach.desc}</span>
-                    </div>
-                `).join('');
-            }
+            if (earnedAchievements.length === 0) achListContainer.innerHTML = `<div class="login-ach-item" style="color:rgba(255,255,255,0.4); text-align:center;">此角色過於平凡，未解鎖任何成就</div>`;
+            else achListContainer.innerHTML = earnedAchievements.map(ach => `<div class="login-ach-item"><span class="login-ach-title" style="color: ${ach.color};">${ach.title}</span><span class="login-ach-desc">${ach.desc}</span></div>`).join('');
 
-            // 利用外部 JSON 動態生成 Tips
-            const tipsArea = document.getElementById('login-tips-area');
-            let currentTipIndex = 0;
-            tipsArea.innerText = waitingTipsData[currentTipIndex] || "";
-
+            const tipsArea = document.getElementById('login-tips-area'); let currentTipIndex = 0; tipsArea.innerText = waitingTipsData[currentTipIndex] || "";
             if (loginTipsInterval) clearInterval(loginTipsInterval);
-            if (waitingTipsData.length > 0) {
-                loginTipsInterval = setInterval(() => {
-                    currentTipIndex = (currentTipIndex + 1) % waitingTipsData.length;
-                    tipsArea.innerText = waitingTipsData[currentTipIndex];
-                }, 3000);
-            }
+            if (waitingTipsData.length > 0) { loginTipsInterval = setInterval(() => { currentTipIndex = (currentTipIndex + 1) % waitingTipsData.length; tipsArea.innerText = waitingTipsData[currentTipIndex]; }, 3000); }
+
+            // 初始化任務系統
+            initMissions();
         }
+
+        // ==================== 任務系統邏輯 ====================
+        function initMissions() {
+            activeMissions = missionsData.map(m => {
+                let done = Math.floor(Math.random() * (m.random_done_max - m.random_done_min + 1)) + m.random_done_min;
+                
+                // 強制滿次數條件
+                if (m.force_max_done_condition && evaluateCondition(m.force_max_done_condition, playerContext)) {
+                    done = m.max_attempts;
+                }
+                // 強制歸零條件 (例如：A0 玩家拍拖次數必須為 0)
+                if (m.force_zero_condition && evaluateCondition(m.force_zero_condition, playerContext)) {
+                  done = 0;
+                }
+
+                let status = 'available';
+                if (done >= m.max_attempts) {
+                    status = 'maxed';
+                } else if (Math.random() < m.in_progress_prob) {
+                    status = 'progress';
+                }
+
+                // 檢查 Warning 條件是否成立
+                let showWarning = false;
+                if (m.warning_condition && evaluateCondition(m.warning_condition, playerContext)) {
+                    showWarning = true;
+                }
+
+                return { ...m, done: done, status: status, showWarning: showWarning };
+            });
+        }
+
+        function openMissionManager() {
+            renderMissions();
+            openModal('mission-modal');
+        }
+
+        function renderMissions() {
+            const inProgressList = document.getElementById('in-progress-list');
+            const availableList = document.getElementById('available-list');
+            inProgressList.innerHTML = ''; availableList.innerHTML = '';
+
+            let progressMissions = activeMissions.filter(m => m.status === 'progress');
+            let avail = activeMissions.filter(m => m.status === 'available');
+            let maxed = activeMissions.filter(m => m.status === 'maxed');
+
+            // 渲染進行中
+            if (progressMissions.length === 0) inProgressList.innerHTML = '<div class="mission-empty">目前沒有進行中的任務</div>';
+            else progressMissions.forEach(m => inProgressList.appendChild(createMissionCard(m)));
+
+            // 渲染可選 (Maxed 墊底)
+            const combinedAvailable = [...avail, ...maxed];
+            if (combinedAvailable.length === 0) availableList.innerHTML = '<div class="mission-empty">目前沒有可接取的任務</div>';
+            else combinedAvailable.forEach(m => availableList.appendChild(createMissionCard(m)));
+        }
+
+        function createMissionCard(m) {
+            const div = document.createElement('div');
+            div.className = 'mission-card' + (m.status === 'maxed' ? ' greyed-out' : '');
+            
+            let warnHtml = (m.showWarning && m.warning_text) ? `<div class="warning">${m.warning_text}</div>` : '';
+            
+            div.innerHTML = `
+                <h4>${m.name}</h4>
+                <p class="desc">${m.desc}</p>
+                <div class="reward">獎勵: ${m.reward}</div>
+                <div class="attempts">次數: ${m.done} / ${m.max_attempts}</div>
+                ${warnHtml}
+            `;
+
+            if (m.status === 'available') {
+                div.onclick = () => startMission(m.id);
+            }
+            return div;
+        }
+
+        function startMission(id) {
+            let m = activeMissions.find(x => x.id === id);
+            if (!m || m.status !== 'available') return;
+            
+            // 如果觸發 Warning，彈出 Toast 提示
+            if (m.showWarning && m.warning_text) {
+                showToast('任務警告', m.warning_text, 'warning');
+            }
+
+            // 修改狀態為進行中並重新渲染
+            m.status = 'progress';
+            renderMissions();
+        }
+
     </script>
 </body>
 </html>
