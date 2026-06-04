@@ -9,6 +9,7 @@
       "random_done_min": 0,
       "random_done_max": 2,
       "in_progress_prob": 0.20,
+      "force_zero_condition": "love === 'A0'",
       "warning_condition": "love === 'A0' || love.startsWith('A3')",
       "warning_text": "⚠角色可能沒有足夠社交能力,社交能量,經濟能力或欲望"
     },
