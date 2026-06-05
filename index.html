@@ -205,7 +205,7 @@
         .mission-horizontal-list::-webkit-scrollbar-thumb { background: rgba(0,168,255,0.5); border-radius: 3px; }
 
         /* 卡片 Scale Down 與 Compact 化 */
-        .mission-card { min-width: 210px; max-width: 240px; background: linear-gradient(135deg, rgba(30,40,55,1), rgba(20,25,35,1)); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; flex-shrink: 0; display: flex; flex-direction: column; scroll-snap-align: start; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; max-height: 100%; overflow-y: auto; }
+        .mission-card { width: 100%; background: linear-gradient(135deg, rgba(30,40,55,1), rgba(20,25,35,1)); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; flex-shrink: 0; display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; max-height: 100%; overflow-y: auto; }
         .mission-card::-webkit-scrollbar { width: 3px; }
         .mission-card:hover:not(.greyed-out) { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,168,255,0.3); border-color: rgba(0,168,255,0.6); }
         .mission-card h4 { font-size: 1.05rem; color: #00a8ff; margin-bottom: 4px; flex-shrink: 0; }
@@ -216,6 +216,35 @@
 
         .mission-card.greyed-out { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
         .mission-empty { font-size: 0.85rem; color: rgba(255,255,255,0.4); font-style: italic; padding: 10px; width: 100%; text-align: center; }
+
+        /* ===== Pixel Dissolve Effect ===== */
+        .mission-card-pixel-wrap {
+            position: relative;
+            min-width: 210px;
+            max-width: 240px;
+            flex-shrink: 0;
+            scroll-snap-align: start;
+            display: flex;
+            align-items: flex-start;
+        }
+        .mission-card-pixel-wrap canvas.pixel-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            border-radius: 8px;
+            z-index: 5;
+            /* Bloom: soft glow halo on the whole canvas */
+            filter: drop-shadow(0 0 4px rgba(0,168,255,0.7)) drop-shadow(0 0 10px rgba(0,200,255,0.3));
+        }
+        @keyframes pixelBlockFadeOut {
+            0%   { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        @keyframes pixelBlockFadeIn {
+            0%   { opacity: 0; }
+            100% { opacity: 1; }
+        }
 
         /* 自定義 Toast */
         .toast-container { position: fixed; top: 30px; right: 40px; display: flex; flex-direction: column; gap: 12px; z-index: 9999; pointer-events: none; max-width: 360px; width: calc(100% - 80px); }
@@ -909,6 +938,10 @@ textureLoader.load(
         }
 
         function createMissionCard(m) {
+            const wrap = document.createElement('div');
+            wrap.className = 'mission-card-pixel-wrap';
+            wrap.dataset.missionId = m.id;
+
             const div = document.createElement('div');
             div.className = 'mission-card' + (m.status === 'maxed' ? ' greyed-out' : '');
             
@@ -925,19 +958,317 @@ textureLoader.load(
             if (m.status === 'available') {
                 div.onclick = () => startMission(m.id);
             }
-            return div;
+
+            wrap.appendChild(div);
+            return wrap;
         }
 
         function startMission(id) {
             let m = activeMissions.find(x => x.id === id);
             if (!m || m.status !== 'available') return;
-            
+
             if (m.showWarning && m.warning_text) {
                 showToast('任務警告', m.warning_text, 'warning');
             }
 
+            // Find the card wrap in available-list
+            const availList = document.getElementById('available-list');
+            const inProgList = document.getElementById('in-progress-list');
+            const oldWrap = availList.querySelector(`[data-mission-id="${id}"]`);
+
+            if (!oldWrap) {
+                // Fallback: no DOM element found, just update state
+                m.status = 'progress';
+                renderMissions();
+                return;
+            }
+
+            const PIXEL = 10; // px block size
+            const DURATION = 600; // ms total
+
+            // ── helper: build shuffled pixel index array ──
+            function shuffledIndices(cols, rows) {
+                const arr = Array.from({ length: cols * rows }, (_, i) => i);
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                return arr;
+            }
+
+            // ── helper: snapshot a card element to canvas ──
+            function snapshotCard(cardEl) {
+                const rect = cardEl.getBoundingClientRect();
+                const W = Math.round(rect.width);
+                const H = Math.round(rect.height);
+                const cvs = document.createElement('canvas');
+                cvs.width = W; cvs.height = H;
+                const ctx = cvs.getContext('2d');
+                ctx.fillStyle = 'rgba(30,40,55,1)';
+                ctx.roundRect(0, 0, W, H, 8);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+                ctx.lineWidth = 1;
+                ctx.roundRect(0, 0, W, H, 8);
+                ctx.stroke();
+                ctx.fillStyle = '#00a8ff';
+                ctx.fillRect(10, 10, W * 0.55, 12);
+                ctx.fillStyle = 'rgba(255,255,255,0.15)';
+                ctx.fillRect(10, 30, W * 0.85, 8);
+                ctx.fillRect(10, 44, W * 0.70, 8);
+                ctx.fillStyle = 'rgba(46,204,113,0.6)';
+                ctx.fillRect(10, 60, W * 0.50, 8);
+                return { cvs, W, H };
+            }
+
+            // ── helper: generate a glowing pixel color in the blue family ──
+            // Returns [baseColor, glowColor] CSS strings
+            function glowPixelColor(rng) {
+                // Hue family: cool blues / cyans / teals (185–220°)
+                const hue = 185 + Math.floor(rng * 35);
+                const sat = 70 + Math.floor(rng * 25);    // 70–95%
+                const lit = 45 + Math.floor(rng * 35);    // 45–80%
+                const alpha = 0.75 + rng * 0.25;           // 0.75–1.0
+                const base = `hsla(${hue},${sat}%,${lit}%,${alpha.toFixed(2)})`;
+                const glow = `hsla(${hue},${sat + 10}%,${Math.min(lit + 30, 95)}%,0.9)`;
+                return { base, glow, hue, lit };
+            }
+
+            // ── helper: draw a single glowing pixel block ──
+            function drawGlowPixel(ctx, px, py, size, colorInfo, glowRadius) {
+                const cx = px + size / 2;
+                const cy = py + size / 2;
+
+                // Glow halo (radial gradient behind pixel)
+                if (glowRadius > 0) {
+                    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowRadius);
+                    grad.addColorStop(0, colorInfo.glow.replace('0.9)', '0.55)'));
+                    grad.addColorStop(1, 'rgba(0,168,255,0)');
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(px - glowRadius + size/2, py - glowRadius + size/2, glowRadius * 2, glowRadius * 2);
+                }
+
+                // Core pixel block with slight inner brightness variation
+                ctx.fillStyle = colorInfo.base;
+                ctx.fillRect(px, py, size, size);
+
+                // Bright top-left specular on pixel
+                const specGrad = ctx.createLinearGradient(px, py, px + size, py + size);
+                specGrad.addColorStop(0, 'rgba(255,255,255,0.35)');
+                specGrad.addColorStop(0.5, 'rgba(255,255,255,0.0)');
+                ctx.fillStyle = specGrad;
+                ctx.fillRect(px, py, size, size);
+            }
+
+            // ── DISSOLVE OUT: existing card in available-list ──
+            function dissolveOut(wrap, onDone) {
+                const card = wrap.querySelector('.mission-card');
+                const rect = card.getBoundingClientRect();
+                const W = Math.round(rect.width) || 210;
+                const H = Math.round(rect.height) || 160;
+                const cols = Math.ceil(W / PIXEL);
+                const rows = Math.ceil(H / PIXEL);
+
+                const cvs = document.createElement('canvas');
+                cvs.className = 'pixel-canvas';
+                cvs.width = W; cvs.height = H;
+                cvs.style.cssText = `position:absolute;top:0;left:0;width:${W}px;height:${H}px;pointer-events:none;border-radius:8px;z-index:5;`;
+                wrap.style.position = 'relative';
+                wrap.appendChild(cvs);
+
+                const ctx = cvs.getContext('2d');
+                const { cvs: snap } = snapshotCard(card);
+
+                // Draw initial snapshot
+                ctx.drawImage(snap, 0, 0, W, H);
+                card.style.visibility = 'hidden';
+
+                const indices = shuffledIndices(cols, rows);
+                const total = indices.length;
+                const startTime = performance.now();
+
+                // Pre-generate per-pixel random seeds + color info for glow
+                const pixelRng = Array.from({ length: total }, () => Math.random());
+                const pixelColors = pixelRng.map(r => glowPixelColor(r));
+                // Track which pixels have been erased & which are "flashing" border pixels
+                const erased = new Uint8Array(total);
+
+                function eraseFrame(now) {
+                    const elapsed = now - startTime;
+                    const progress = Math.min(elapsed / DURATION, 1);
+                    const toErase = Math.floor(progress * total);
+
+                    ctx.clearRect(0, 0, W, H);
+                    // Redraw unerased pixels from snapshot
+                    ctx.drawImage(snap, 0, 0, W, H);
+
+                    // Mark newly erased
+                    for (let i = 0; i < toErase; i++) erased[i] = 1;
+
+                    // Clear erased pixels and draw glow on "frontier" pixels
+                    for (let i = 0; i < total; i++) {
+                        const idx = indices[i];
+                        const col = idx % cols;
+                        const row = Math.floor(idx / cols);
+                        const px = col * PIXEL;
+                        const py = row * PIXEL;
+
+                        if (erased[i]) {
+                            // Cleared
+                            ctx.clearRect(px, py, PIXEL, PIXEL);
+                        } else if (i < toErase + Math.ceil(total * 0.06)) {
+                            // Frontier pixels: flash with glow before disappearing
+                            const flickerT = (elapsed * 0.015 + pixelRng[i] * 6.28);
+                            const flicker = 0.55 + 0.45 * Math.sin(flickerT);
+                            ctx.clearRect(px, py, PIXEL, PIXEL);
+                            ctx.globalAlpha = flicker;
+                            drawGlowPixel(ctx, px, py, PIXEL, pixelColors[i], PIXEL * 1.2);
+                            ctx.globalAlpha = 1;
+                        }
+                    }
+
+                    if (progress < 1) {
+                        requestAnimationFrame(eraseFrame);
+                    } else {
+                        ctx.clearRect(0, 0, W, H);
+                        wrap.remove();
+                        onDone && onDone();
+                    }
+                }
+                requestAnimationFrame(eraseFrame);
+            }
+
+            // ── APPEAR IN: new card in in-progress-list ──
+            function appearIn(newWrap) {
+                const card = newWrap.querySelector('.mission-card');
+                const rect = card.getBoundingClientRect();
+                const W = Math.round(rect.width) || 210;
+                const H = Math.round(rect.height) || 160;
+                const cols = Math.ceil(W / PIXEL);
+                const rows = Math.ceil(H / PIXEL);
+
+                const cvs = document.createElement('canvas');
+                cvs.className = 'pixel-canvas';
+                cvs.width = W; cvs.height = H;
+                cvs.style.cssText = `position:absolute;top:0;left:0;width:${W}px;height:${H}px;pointer-events:none;border-radius:8px;z-index:5;`;
+                newWrap.style.position = 'relative';
+                newWrap.appendChild(cvs);
+                const ctx = cvs.getContext('2d');
+
+                const { cvs: snap } = snapshotCard(card);
+
+                card.style.visibility = 'hidden';
+
+                // Phase 1 (0–0.67s): pixels materialise with glow, one by one
+                // Phase 2 (0.67–1.0s): de-pixelate — reveal real card, dissolve canvas
+
+                const indices = shuffledIndices(cols, rows);
+                const total = indices.length;
+                const PHASE1 = DURATION * 0.67;
+                const PHASE2 = DURATION * 0.33;
+                const startTime = performance.now();
+
+                // Pre-assign a random hue/style per pixel for the whole sequence
+                const pixelRng = Array.from({ length: total }, () => Math.random());
+                const pixelColors = pixelRng.map(r => glowPixelColor(r));
+
+                ctx.clearRect(0, 0, W, H);
+
+                function drawFrame(now) {
+                    const elapsed = now - startTime;
+
+                    if (elapsed < PHASE1) {
+                        // ── Phase 1: pixels appearing with glow ──
+                        const progress = elapsed / PHASE1;
+                        const toShow = Math.floor(progress * total);
+
+                        ctx.clearRect(0, 0, W, H);
+
+                        for (let i = 0; i < toShow; i++) {
+                            const idx = indices[i];
+                            const col = idx % cols;
+                            const row = Math.floor(idx / cols);
+                            const px = col * PIXEL;
+                            const py = row * PIXEL;
+
+                            // Settled pixels: draw from snapshot + tint overlay
+                            ctx.drawImage(snap, px, py, PIXEL, PIXEL, px, py, PIXEL, PIXEL);
+
+                            // Overlay a soft color tint that fades based on age
+                            const age = (toShow - i) / total; // 0 = newest, 1 = oldest
+                            const tintAlpha = Math.max(0, 0.6 - age * 0.6);
+                            if (tintAlpha > 0.01) {
+                                ctx.globalAlpha = tintAlpha;
+                                drawGlowPixel(ctx, px, py, PIXEL, pixelColors[i], 0);
+                                ctx.globalAlpha = 1;
+                            }
+                        }
+
+                        // Frontier: last few pixels flash/glow brightly
+                        const frontierSize = Math.ceil(total * 0.05);
+                        for (let i = Math.max(0, toShow - frontierSize); i < toShow; i++) {
+                            const idx = indices[i];
+                            const col = idx % cols;
+                            const row = Math.floor(idx / cols);
+                            const px = col * PIXEL;
+                            const py = row * PIXEL;
+
+                            const age = (toShow - i) / frontierSize; // 1 = oldest in frontier
+                            const flickerT = elapsed * 0.018 + pixelRng[i] * Math.PI * 2;
+                            const flicker = 0.7 + 0.3 * Math.sin(flickerT);
+                            const glowAlpha = (1 - age) * flicker;
+
+                            ctx.clearRect(px, py, PIXEL, PIXEL);
+                            ctx.globalAlpha = glowAlpha;
+                            drawGlowPixel(ctx, px, py, PIXEL, pixelColors[i], PIXEL * 1.4);
+                            ctx.globalAlpha = 1;
+                        }
+
+                        requestAnimationFrame(drawFrame);
+
+                    } else if (elapsed < PHASE1 + PHASE2) {
+                        // ── Phase 2: de-pixelate — show real card, crossfade out canvas ──
+                        const p2 = (elapsed - PHASE1) / PHASE2;
+                        card.style.visibility = 'visible';
+                        // Ease-out fade
+                        cvs.style.opacity = (1 - p2 * p2).toFixed(3);
+                        requestAnimationFrame(drawFrame);
+                    } else {
+                        // ── Done ──
+                        card.style.visibility = 'visible';
+                        card.style.opacity = '1';
+                        cvs.remove();
+                    }
+                }
+                requestAnimationFrame(drawFrame);
+            }
+
+            // ── Kick off the sequence ──
             m.status = 'progress';
-            renderMissions();
+
+            // Remove empty placeholder if present
+            const emptyEl = inProgList.querySelector('.mission-empty');
+            if (emptyEl) emptyEl.remove();
+
+            // Build new card for in-progress list (hidden until appear anim)
+            const newWrap = createMissionCard(m);
+            newWrap.querySelector('.mission-card').style.visibility = 'hidden';
+            inProgList.appendChild(newWrap);
+
+            // Start dissolve-out of old card
+            dissolveOut(oldWrap, () => {
+                // Also remove the card from available if it was the last
+                if (availList.children.length === 0) {
+                    availList.innerHTML = '<div class="mission-empty">目前沒有可接取的任務</div>';
+                }
+            });
+
+            // Start appear-in of new card (slight delay so both play simultaneously)
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    appearIn(newWrap);
+                });
+            });
         }
 
     </script>
