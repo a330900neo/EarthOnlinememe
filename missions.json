@@ -49,6 +49,33 @@
       "in_progress_prob": 0.05,
       "warning_condition": "false",
       "warning_text": ""
+    },
+    {
+      "id": "overtaker",
+      "name": "超車達人",
+      "desc": "連續超越60人",
+      "reward": "移動+5",
+      "max_attempts": 15,
+      "random_done_min": 0,
+      "random_done_max": 15,
+      "force_max_done_condition": "achievements.includes('school_run')",
+      "in_progress_prob": 0.05,
+      "force_zero_condition": "",
+      "warning_condition": "",
+      "warning_text": ""
+    },
+    {
+      "id": "chinese_grade_good",
+      "name": "放棄邏輯",
+      "desc": "在中文科考試取得 ≥70%",
+      "reward": "情感能力+1 邏輯能力-7",
+      "max_attempts": 3,
+      "random_done_min": 0,
+      "random_done_max": 3,
+      "in_progress_prob": 0.17,
+      "force_zero_condition": "",
+      "warning_condition": "",
+      "warning_text": ""
     }
   ]
 }
