@@ -7,14 +7,16 @@
 <style>
     body, html {
     margin: 0; padding: 0;
-    overflow: hidden; /* 防止出現側邊 scrollbar */
-    background-color: #050505;
+    overflow: hidden;
+    background-color: transparent; /* 🟢 改為透明 */
 }
 #bus-loading-screen {
-    position: relative; /* 改為相對定位，跟隨 canvas 大細 */
-    width: 100%; height: 100%;
-    background: transparent; overflow: hidden;
-    display: flex; justify-content: center; align-items: center;
+    position: relative;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: transparent; /* 🟢 確保容器都係透明 */
+    overflow: hidden;
+    display: flex;
+    justify-content: center; align-items: center;
 }
     #bus-canvas { display: block; width: 100%; height: 100%; }
 </style>
