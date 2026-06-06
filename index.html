@@ -289,6 +289,34 @@
             .login-dynamic-tips { font-size: 0.95rem; }
             .top-mission-btn { top: 15px; padding: 8px 25px; font-size: 0.95rem; }
         }
+
+        /* ===== 開發商 Logo 啟動畫面 ===== */
+        #dev-logo-screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        #dev-logo-screen.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #dev-logo-img {
+            max-width: 280px;
+            max-height: 280px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 0 20px rgba(0, 168, 255, 0.4));
+        }
     </style>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -301,6 +329,11 @@
     </div>
     <div class="bg-overlay"></div>
     <div id="toast-container" class="toast-container"></div>
+
+    <!-- 開發商 Logo 啟動畫面 -->
+    <div id="dev-logo-screen">
+        <img id="dev-logo-img" src="https://raw.githubusercontent.com/a330900neo/EarthOnlinememe/main/ATOM.png" alt="Developer Logo">
+    </div>
 
     <div id="init-screen" class="screen active" onclick="tryStartGame()">
         <div class="prompt-text">【 點擊螢幕進入 地球Online 】</div>
@@ -492,7 +525,7 @@
                 "random_done_max": 2,
                 "in_progress_prob": 0.20,
                 "force_zero_condition": "love === 'A0'",
-                "warning_condition": "love === 'A0' || love.startsWith('A3')",
+                "warning_condition": "love === 'A0' || (love.startsWith('A') && parseInt(love.slice(1)) >= 10)",
                 "warning_text": "⚠角色可能沒有足夠社交能力,社交能量,經濟能力或欲望"
             },
             {
@@ -758,8 +791,36 @@ textureLoader.load(
 
         // --- 遊戲流程 ---
         function tryStartGame() {
-            const docElm = document.documentElement; if (docElm.requestFullscreen) docElm.requestFullscreen(); else if (docElm.mozRequestFullScreen) docElm.mozRequestFullScreen(); else if (docElm.webkitRequestFullScreen) docElm.webkitRequestFullScreen(); else if (docElm.msRequestFullscreen) docElm.msRequestFullscreen();
-            document.getElementById('init-screen').classList.remove('active'); document.getElementById('loading-screen').classList.add('active'); init3DEarth(); startLoadingSequence();
+            const docElm = document.documentElement;
+            if (docElm.requestFullscreen) docElm.requestFullscreen();
+            else if (docElm.mozRequestFullScreen) docElm.mozRequestFullScreen();
+            else if (docElm.webkitRequestFullScreen) docElm.webkitRequestFullScreen();
+            else if (docElm.msRequestFullscreen) docElm.msRequestFullscreen();
+
+            // 隱藏初始畫面，顯示開發商 Logo
+            document.getElementById('init-screen').classList.remove('active');
+            showDevLogo();
+        }
+
+        function showDevLogo() {
+            const logoScreen = document.getElementById('dev-logo-screen');
+
+            // Fade in (0.4s)
+            logoScreen.classList.add('visible');
+
+            // 停留 3 秒後 fade out (0.4s)
+            setTimeout(() => {
+                logoScreen.style.opacity = '0';
+                logoScreen.style.transition = 'opacity 0.4s ease';
+
+                setTimeout(() => {
+                    logoScreen.style.display = 'none';
+                    // Logo 消失後才開始 loading
+                    document.getElementById('loading-screen').classList.add('active');
+                    init3DEarth();
+                    startLoadingSequence();
+                }, 400); // 等 fade out 完成
+            }, 3000 + 400); // 等待 fade in(0.4s) + 顯示 3 秒
         }
 
         function startLoadingSequence() {
