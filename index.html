@@ -290,6 +290,343 @@
             .top-mission-btn { top: 15px; padding: 8px 25px; font-size: 0.95rem; }
         }
 
+        /* ===== 角色歷史面板 ===== */
+        /* ===== 角色歷史 Screen ===== */
+        #history-screen {
+            background: transparent;
+            z-index: 12;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: flex-start;
+        }
+
+        /* Frosted glass full-page backdrop */
+        .history-bg-frost {
+            position: absolute;
+            inset: 0;
+            background: rgba(4, 9, 18, 0.78);
+            backdrop-filter: blur(24px) saturate(1.5);
+            -webkit-backdrop-filter: blur(24px) saturate(1.5);
+            z-index: 0;
+        }
+
+        /* Top bar */
+        .history-topbar {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            padding: 28px 5vw 16px;
+            border-bottom: 1px solid rgba(0,168,255,0.15);
+            flex-shrink: 0;
+        }
+        .history-topbar-titles { display: flex; flex-direction: column; }
+        .history-title {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #00a8ff;
+            letter-spacing: 5px;
+        }
+        .history-subtitle {
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.35);
+            font-family: monospace;
+            letter-spacing: 2px;
+            margin-top: 3px;
+        }
+        .history-back-btn {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 9px 24px;
+            font-size: 0.9rem;
+            letter-spacing: 3px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        .history-back-btn:hover { background: white; color: black; }
+
+        /* Traits strip */
+        .history-traits-section {
+            position: relative;
+            z-index: 1;
+            padding: 12px 5vw;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .history-traits-label {
+            font-size: 0.68rem;
+            color: rgba(255,255,255,0.35);
+            font-family: monospace;
+            letter-spacing: 2px;
+            flex-shrink: 0;
+        }
+        .history-trait-tag {
+            font-size: 0.78rem;
+            padding: 3px 11px;
+            border-radius: 20px;
+            border: 1px solid rgba(0,168,255,0.5);
+            color: #00a8ff;
+            background: rgba(0,168,255,0.08);
+            letter-spacing: 1px;
+        }
+        .history-trait-tag.bad    { border-color: rgba(255,71,87,0.5);   color: #ff4757; background: rgba(255,71,87,0.08);   }
+        .history-trait-tag.good   { border-color: rgba(46,204,113,0.5);  color: #2ecc71; background: rgba(46,204,113,0.08);  }
+        .history-trait-tag.neutral{ border-color: rgba(241,196,15,0.5);  color: #f1c40f; background: rgba(241,196,15,0.08);  }
+
+        /* Timeline scroll area */
+        .timeline-scroll-area {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 20px 5vw 32px;
+        }
+        .timeline-scroll-area::-webkit-scrollbar { width: 4px; }
+        .timeline-scroll-area::-webkit-scrollbar-thumb { background: rgba(0,168,255,0.3); border-radius: 2px; }
+
+        /* Legend */
+        .timeline-legend {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 28px;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.38);
+            font-family: monospace;
+        }
+        .legend-seg {
+            display: inline-block;
+            width: 22px; height: 10px;
+            border-radius: 3px;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        /* ── Single horizontal timeline rail ── */
+        .timeline-outer {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        /* The rail itself: one horizontal flex row of sections */
+        .timeline-rail {
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            height: 36px;
+            gap: 2px;
+            margin-bottom: 0;
+        }
+
+        /* One section per year */
+        .tl-section {
+            flex: 1;
+            min-width: 0;
+            height: 100%;
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            transition: filter 0.18s, transform 0.18s;
+            transform-origin: center bottom;
+            /* Segments inside: flex column of event blocks */
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 2px;
+        }
+        .tl-section:hover {
+            filter: brightness(1.35);
+            transform: scaleY(1.12);
+            z-index: 2;
+        }
+
+        /* Individual event block inside a section */
+        .tl-event-block {
+            flex: 1;
+            border-radius: 2px;
+            min-height: 4px;
+            opacity: 0;
+            transform: scaleY(0.2);
+            transform-origin: top center;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .tl-event-block.show {
+            opacity: 1;
+            transform: scaleY(1);
+        }
+
+        /* Empty year: just a thin dim line */
+        .tl-section-empty {
+            flex: 1;
+            height: 4px;
+            align-self: center;
+            border-radius: 2px;
+            background: rgba(255,255,255,0.08);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .tl-section-empty:hover { background: rgba(255,255,255,0.18); }
+
+        /* Age labels row below the rail */
+        .timeline-labels {
+            display: flex;
+            flex-direction: row;
+            gap: 2px;
+            margin-top: 8px;
+        }
+        .tl-label {
+            flex: 1;
+            font-family: monospace;
+            font-size: 0.62rem;
+            color: rgba(255,255,255,0.32);
+            text-align: center;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .tl-label.active-label {
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* Color by event count */
+        .sec-c0  { /* handled as empty */ }
+        .sec-c1  { background: rgba(30, 55, 153, 0.5); }
+        .sec-c2  { background: rgba(36, 117, 176, 0.6); }
+        .sec-c3  { background: rgba(0, 168, 255, 0.65); }
+        .sec-c4  { background: rgba(0, 206, 201, 0.7); }
+        .sec-c5  { background: rgba(46, 204, 113, 0.75); }
+        .sec-c6p { background: rgba(241, 196, 15, 0.8); }
+
+        .blk-c1  { background: #1e3799; }
+        .blk-c2  { background: #2475b0; }
+        .blk-c3  { background: #00a8ff; }
+        .blk-c4  { background: #00cec9; }
+        .blk-c5  { background: #2ecc71; }
+        .blk-c6p { background: #f1c40f; }
+
+        /* Tap hint tooltip above hovered section */
+        .tl-section::after {
+            content: attr(data-age);
+            position: absolute;
+            bottom: calc(100% + 6px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: #fff;
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s;
+            font-family: monospace;
+        }
+        .tl-section:hover::after { opacity: 1; }
+        .tl-section-empty::after {
+            content: attr(data-age);
+            position: absolute;
+            bottom: calc(100% + 6px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: #fff;
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s;
+            font-family: monospace;
+        }
+        .tl-section-empty { position: relative; }
+        .tl-section-empty:hover::after { opacity: 1; }
+
+
+        /* History event popup */
+        .history-event-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.22s ease;
+        }
+        .history-event-overlay.active { opacity: 1; pointer-events: auto; }
+        .history-event-modal {
+            background: linear-gradient(135deg, rgba(10,18,30,0.97), rgba(6,12,22,0.99));
+            border: 1px solid rgba(0,168,255,0.35);
+            border-radius: 12px;
+            width: 88%; max-width: 440px; max-height: 70vh;
+            display: flex; flex-direction: column;
+            box-shadow: 0 0 40px rgba(0,168,255,0.15);
+            transform: scale(0.93);
+            transition: transform 0.22s ease;
+            overflow: hidden;
+        }
+        .history-event-overlay.active .history-event-modal { transform: scale(1); }
+        .history-event-modal-header {
+            padding: 16px 22px 12px;
+            border-bottom: 1px solid rgba(0,168,255,0.2);
+            display: flex; align-items: center; justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .history-event-modal-title { font-size: 1.05rem; color: #00a8ff; font-weight: bold; letter-spacing: 3px; }
+        .history-event-close { font-size: 1.6rem; color: rgba(255,255,255,0.5); cursor: pointer; line-height: 1; }
+        .history-event-close:hover { color: #ff4757; }
+        .history-event-list { overflow-y: auto; padding: 12px 22px 18px; flex: 1; }
+        .history-event-list::-webkit-scrollbar { width: 3px; }
+        .history-event-list::-webkit-scrollbar-thumb { background: rgba(0,168,255,0.4); border-radius: 2px; }
+        .history-event-item {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px; padding: 10px 14px; margin-bottom: 8px;
+        }
+        .history-event-item-title { font-size: 0.95rem; font-weight: bold; color: #fff; letter-spacing: 1px; margin-bottom: 4px; }
+        .history-event-item-desc  { font-size: 0.82rem; color: rgba(255,255,255,0.6); line-height: 1.4; }
+        .history-event-empty { font-size: 0.85rem; color: rgba(255,255,255,0.3); text-align: center; padding: 20px 0; font-style: italic; }
+
+        /* 角色歷史按鈕 — 右上角 of login screen */
+        .history-open-btn {
+            position: absolute;
+            top: 30px;
+            right: 28px;
+            background: linear-gradient(90deg, rgba(0,168,255,0.15), rgba(0,124,179,0.3));
+            border: 1px solid rgba(0,168,255,0.5);
+            color: white;
+            padding: 9px 22px;
+            border-radius: 22px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            letter-spacing: 3px;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 12px rgba(0,168,255,0.3);
+            z-index: 15;
+            transition: all 0.2s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+        #login-character-screen.active .history-open-btn { opacity: 1; pointer-events: auto; }
+        .history-open-btn:hover { background: rgba(0,168,255,0.35); box-shadow: 0 0 20px rgba(0,168,255,0.5); }
+
         /* ===== 開發商 Logo 啟動畫面 ===== */
         #dev-logo-screen {
             position: fixed;
@@ -440,6 +777,7 @@
 
     <div id="login-character-screen" class="screen">
         
+        <button class="history-open-btn" onclick="openHistoryScreen()">角色歷史</button>
         <button class="top-mission-btn" onclick="openMissionManager()">任務管理</button>
 
         <div class="left-panel-container login-panel-transparent">
@@ -942,8 +1280,9 @@ textureLoader.load(
             clearTimeout(spawnTimeout); navigateTo('character-loading-screen');
             const constitution = Math.floor(Math.random() * 51) + 50; const wealth = Math.floor(Math.random() * 90001) + 10000; const isMale = Math.random() > 0.5;
             document.getElementById('char-stats').innerHTML = `<div class="stat-line"><span>體質</span><span class="stat-value">${constitution} / 100</span></div><div class="stat-line"><span>家境(月入)</span><span class="stat-value">$${wealth.toLocaleString()} HKD</span></div><div class="stat-line"><span>性別</span><span class="stat-value">${isMale ? '男' : '女'}</span></div>`;
+            playerTraits = [];
             let traitsHtml = '';
-            traitsData.forEach(t => { if (Math.random() <= t.prob) traitsHtml += `<div class="trait-box ${t.type || ''}"><h4>${t.title}</h4><p>${t.desc}</p></div>`; });
+            traitsData.forEach(t => { if (Math.random() <= t.prob) { playerTraits.push(t); traitsHtml += `<div class="trait-box ${t.type || ''}"><h4>${t.title}</h4><p>${t.desc}</p></div>`; } });
             if (traitsHtml === '') traitsHtml = `<div class="trait-box" style="border-left-color: #888;"><h4>凡夫俗子</h4><p>沒有獲得任何特殊出廠設定，一切只能靠自己。</p></div>`;
             document.getElementById('char-traits').innerHTML = traitsHtml;
         }
@@ -974,13 +1313,16 @@ textureLoader.load(
             document.getElementById('login-constitution').innerText = `${playerContext.constitution} / 100`;
             document.getElementById('login-years').innerText = `${playerContext.years} 年`;
 
-            let loveStatus = 'A0'; const loveRoll = Math.random() * 100;
-            if (loveRoll < 75) { 
-                const a0Roll = Math.random() * 100;
-                if (a0Roll < 15) loveStatus = 'A380'; else if (a0Roll < 18) loveStatus = 'A350'; else if (a0Roll < 19.5) loveStatus = 'A340'; else if (a0Roll < 23) loveStatus = 'A330'; else if (a0Roll < 26.5) loveStatus = 'A320'; else if (a0Roll < 28) loveStatus = 'A321'; else if (a0Roll < 29) loveStatus = 'A319'; else if (a0Roll < 29.5) loveStatus = 'A318'; else if (a0Roll < 29.9) loveStatus = 'A310'; else loveStatus = 'A0';
-            } else if (loveRoll < 85) loveStatus = 'A1'; else if (loveRoll < 95) loveStatus = 'A2'; else loveStatus = 'A3'; 
-            playerContext.love = loveStatus;
-            document.getElementById('login-love').innerText = loveStatus;
+            // Generate traits for this login character
+            playerTraits = [];
+            traitsData.forEach(t => { if (Math.random() <= t.prob) playerTraits.push(t); });
+
+            // Simulate history once at login and cache it
+            const traitIds = playerTraits.map(t => t.id);
+            const simResult = simulateHistory(playerContext, traitIds, playerContext.years);
+            simulatedHistory = simResult.history;
+            playerContext.love = simResult.finalLove;
+            document.getElementById('login-love').innerText = simResult.finalLove;
 
             let earnedAchievements = []; playerContext.achievements = [];
             achievementsData.forEach(ach => {
@@ -1392,5 +1734,255 @@ textureLoader.load(
         }
 
     </script>
+    <!-- 角色歷史 Screen -->
+    <div id="history-screen" class="screen">
+        <div class="history-bg-frost"></div>
+
+        <div class="history-topbar">
+            <div class="history-topbar-titles">
+                <div class="history-title">角色歷史</div>
+                <div class="history-subtitle">CHARACTER HISTORY</div>
+            </div>
+            <button class="history-back-btn" onclick="navigateTo('login-character-screen')">返回</button>
+        </div>
+
+        <div class="history-traits-section">
+            <span class="history-traits-label">特質</span>
+            <div id="history-traits-row" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+        </div>
+
+        <div class="timeline-scroll-area">
+            <div class="timeline-legend">
+                <span><span class="legend-seg" style="background:#1e3799;"></span>少</span>
+                <span><span class="legend-seg" style="background:#00a8ff;"></span>中</span>
+                <span><span class="legend-seg" style="background:#2ecc71;"></span>多</span>
+                <span><span class="legend-seg" style="background:#f1c40f;"></span>非常多</span>
+            </div>
+            <div class="timeline-outer" id="history-timeline"></div>
+        </div>
+    </div>
+
+    <!-- 歷史事件彈窗 -->
+    <div id="history-event-overlay" class="history-event-overlay" onclick="closeHistoryEventModal(event)">
+        <div class="history-event-modal">
+            <div class="history-event-modal-header">
+                <div class="history-event-modal-title" id="history-event-modal-title">XX 歲事件</div>
+                <div class="history-event-close" onclick="document.getElementById('history-event-overlay').classList.remove('active')">×</div>
+            </div>
+            <div class="history-event-list" id="history-event-list"></div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 角色歷史系統 ====================
+        
+        // events.json fallback data
+        let eventsData = [
+            { id:"primary_school",   title:"升小",         desc:"開始小學教程",                         prob:{"6":1} },
+            { id:"secondary_school", title:"升中",         desc:"開始中學教程",                         prob:{"12":1} },
+            {
+                id:"dating_start", title:"拍拖", desc:"成功和一位異性角色建立拍拖連結",
+                prob:{"12-14":0.015,"15":0.03,"16-17":0.06,"18":0.017},
+                prob2:{"12-14":0.005,"15":0.01,"16-17":0.022,"18":0.003},
+                prob2_condition:"traits.includes('asd')", condition:"!dating", effects:{dating:true}
+            },
+            {
+                id:"dating_end", title:"移除拍拖連結", desc:"和一位異性角色移除拍拖連結",
+                prob:{"12-17":0.2,"18":0.25},
+                prob2:{"12-17":0.27,"18":0.33},
+                prob2_condition:"traits.includes('asd')", condition:"dating", effects:{dating:false}
+            },
+            { id:"new_friend",  title:"新好友",       desc:"和一位角色頻繁互動",       prob:{"6-11":0.4,"12":0.92,"13":0.8,"14-15":0.4,"16":0.85,"17-18":0.38} },
+            { id:"lost_friend", title:"自動移除好友", desc:"和一位角色不再互動",       prob:{"6-11":0.05,"12":0.3,"13":0.8,"14-15":0.001,"16":0.004,"17-18":0.0005} },
+            { id:"club",        title:"參與學校學會", desc:"在中學教程中「學會」進行互動", prob:{"6-11":0.0,"12-17":0.95,"18":0.3} }
+        ];
+
+        (async function fetchEventsData() {
+            try {
+                const r = await fetch('https://raw.githubusercontent.com/a330900neo/EarthOnlinememe/main/events.json');
+                if (r.ok) { const j = await r.json(); if (j.events) eventsData = j.events; }
+            } catch(e) {}
+        })();
+
+        function getProbAtAge(probMap, age) {
+            for (const [key, val] of Object.entries(probMap)) {
+                if (key.includes('-')) { const [lo,hi]=key.split('-').map(Number); if(age>=lo&&age<=hi) return val; }
+                else { if(age===Number(key)) return val; }
+            }
+            return 0;
+        }
+
+        function evalCondition(condStr, ctx) {
+            if (!condStr || condStr.trim()==='') return true;
+            try { return new Function(...Object.keys(ctx), `return !!(${condStr});`)(...Object.values(ctx)); } catch(e) { return false; }
+        }
+
+        function interpolateDesc(desc, ctx) {
+            return desc.replace(/\{\{(\w+)\}\}/g, (_,k) => ctx[k]!==undefined ? ctx[k] : '?');
+        }
+
+        function simulateHistory(playerCtx, traitsArr, yearsPlayed) {
+            const startAge = 6;
+            const endAge = Math.min(yearsPlayed, 18);
+            let state = { dating:false, datingCount:0, traits:traitsArr, ...playerCtx };
+            const history = [];
+            for (let age = startAge; age <= endAge; age++) {
+                const yearEvents = [];
+                for (const ev of eventsData) {
+                    let useProb = ev.prob || {};
+                    if (ev.prob2_condition && evalCondition(ev.prob2_condition, state) && ev.prob2) useProb = ev.prob2;
+                    const prob = getProbAtAge(useProb, age);
+                    if (prob <= 0) continue;
+                    if (ev.condition && !evalCondition(ev.condition, state)) continue;
+                    if (Math.random() < prob) {
+                        yearEvents.push({ title: ev.title, desc: interpolateDesc(ev.desc, state) });
+                    if (ev.effects) {
+                        if (ev.id === 'dating_start') {
+                            // Increment dating count and update love level
+                            state.datingCount = (state.datingCount || 0) + 1;
+                            if (state.datingCount === 1) state.love = 'A1';
+                            else if (state.datingCount === 2) state.love = 'A2';
+                            else if (state.datingCount >= 3) state.love = 'A' + state.datingCount;
+                        }
+                        Object.assign(state, ev.effects);
+                    }
+                    }
+                }
+                history.push({ age, events: yearEvents });
+            }
+            // If never dated (still A0), give chance to become Airbus model
+            if (state.datingCount === 0) {
+                const a0Roll = Math.random() * 100;
+                if (a0Roll < 15) state.love = 'A380';
+                else if (a0Roll < 18) state.love = 'A350';
+                else if (a0Roll < 19.5) state.love = 'A340';
+                else if (a0Roll < 23) state.love = 'A330';
+                else if (a0Roll < 26.5) state.love = 'A320';
+                else if (a0Roll < 28) state.love = 'A321';
+                else if (a0Roll < 29) state.love = 'A319';
+                else if (a0Roll < 29.5) state.love = 'A318';
+                else if (a0Roll < 29.9) state.love = 'A310';
+                else state.love = 'A0';
+            }
+            return { history, finalLove: state.love };
+        }
+
+        let playerTraits = [];
+        let simulatedHistory = [];
+
+        function openHistoryScreen() {
+            // Render traits
+            const traitsRow = document.getElementById('history-traits-row');
+            traitsRow.innerHTML = '';
+            if (playerTraits.length === 0) {
+                const s = document.createElement('span');
+                s.className = 'history-trait-tag neutral';
+                s.textContent = '凡夫俗子';
+                traitsRow.appendChild(s);
+            } else {
+                playerTraits.forEach(t => {
+                    const s = document.createElement('span');
+                    s.className = 'history-trait-tag ' + (t.type || '');
+                    s.textContent = t.title;
+                    traitsRow.appendChild(s);
+                });
+            }
+
+            // Simulate & render timeline
+            renderTimeline();
+
+            navigateTo('history-screen');
+        }
+
+        function renderTimeline() {
+            const outer = document.getElementById('history-timeline');
+            outer.innerHTML = '';
+
+            // Use already-simulated history (set during handleLogin)
+            // simulatedHistory is already populated; no re-simulation here
+
+            // ── Build single horizontal rail ──
+            const rail = document.createElement('div');
+            rail.className = 'timeline-rail';
+
+            const labelsRow = document.createElement('div');
+            labelsRow.className = 'timeline-labels';
+
+            simulatedHistory.forEach((yearData, i) => {
+                const count = yearData.events.length;
+
+                // Color class
+                let blkClass;
+                if      (count === 1) blkClass = 'blk-c1';
+                else if (count === 2) blkClass = 'blk-c2';
+                else if (count === 3) blkClass = 'blk-c3';
+                else if (count === 4) blkClass = 'blk-c4';
+                else if (count === 5) blkClass = 'blk-c5';
+                else if (count >= 6) blkClass = 'blk-c6p';
+
+                if (count === 0) {
+                    // Empty year: thin dim line
+                    const sec = document.createElement('div');
+                    sec.className = 'tl-section-empty';
+                    sec.setAttribute('data-age', yearData.age + '年');
+                    sec.onclick = () => openYearEventModal(yearData);
+                    rail.appendChild(sec);
+                } else {
+                    // Section with one block per event stacked inside
+                    const sec = document.createElement('div');
+                    sec.className = 'tl-section';
+                    sec.setAttribute('data-age', yearData.age + '年');
+                    sec.onclick = () => openYearEventModal(yearData);
+
+                    for (let e = 0; e < count; e++) {
+                        const blk = document.createElement('div');
+                        blk.className = 'tl-event-block ' + blkClass;
+                        blk.style.transitionDelay = (i * 25 + e * 15) + 'ms';
+                        sec.appendChild(blk);
+                    }
+                    rail.appendChild(sec);
+                }
+
+                // Label
+                const lbl = document.createElement('div');
+                lbl.className = 'tl-label';
+                // Show age label every 2 years to avoid overcrowding
+                lbl.textContent = (i % 2 === 0) ? yearData.age + '年' : '';
+                labelsRow.appendChild(lbl);
+            });
+
+            outer.appendChild(rail);
+            outer.appendChild(labelsRow);
+
+            // Trigger animations
+            requestAnimationFrame(() => {
+                outer.querySelectorAll('.tl-event-block').forEach(el => el.classList.add('show'));
+            });
+        }
+
+        function openYearEventModal(yearData) {
+            document.getElementById('history-event-modal-title').textContent = `${yearData.age} 年 事件`;
+            const list = document.getElementById('history-event-list');
+            list.innerHTML = '';
+            if (yearData.events.length === 0) {
+                list.innerHTML = '<div class="history-event-empty">本年沒有特別事件發生</div>';
+            } else {
+                yearData.events.forEach(ev => {
+                    const item = document.createElement('div');
+                    item.className = 'history-event-item';
+                    item.innerHTML = `<div class="history-event-item-title">${ev.title}</div><div class="history-event-item-desc">${ev.desc}</div>`;
+                    list.appendChild(item);
+                });
+            }
+            document.getElementById('history-event-overlay').classList.add('active');
+        }
+
+        function closeHistoryEventModal(event) {
+            if (event.target === document.getElementById('history-event-overlay')) {
+                document.getElementById('history-event-overlay').classList.remove('active');
+            }
+        }
+    </script>
+
 </body>
 </html>
