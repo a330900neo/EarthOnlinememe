@@ -65,6 +65,30 @@
       "warning_text": ""
     },
     {
+  "id": "free_labor",
+  "name": "教程:免費勞工",
+  "desc": "為學校無償收集路人的HKD,並向路人送貼紙",
+  "reward": "-",
+  "max_attempts": 3,
+  "random_done_min": 0,
+  "random_done_max": 2,
+  "in_progress_prob": 0.5,
+  "warning_condition": "",
+  "warning_text": ""
+},
+{
+  "id": "learn_chinese_zip",
+  "name": "教程:學習中文.zip",
+  "desc": "學習隨機壓縮文本解壓技能",
+  "reward": "不理解+1",
+  "max_attempts": 1,
+  "random_done_min": 0,
+  "random_done_max": 0,
+  "in_progress_prob": 0.999,
+  "warning_condition": "",
+  "warning_text": ""
+},
+    {
       "id": "chinese_grade_good",
       "name": "放棄邏輯",
       "desc": "在中文科考試取得 ≥70%",
