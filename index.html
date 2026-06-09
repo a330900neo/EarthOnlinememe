@@ -68,7 +68,7 @@
             overflow: hidden;
             transition: transform 2s cubic-bezier(0.25, 1, 0.5, 1);
         }
-        .game-bg-container.shifted { transform: translateX(12vw); }
+        .game-bg-container.shifted { transform: translateX(var(--earth-shift, 12vw)); }
         #three-canvas { width: 100%; height: 100%; display: block; }
 
         .bg-overlay {
@@ -1131,8 +1131,60 @@ textureLoader.load(
             controls.update(); renderer.render(scene, camera);
         }
 
+        // ===== Adaptive Earth Sizing =====
+        // Computes camera distance and bg-container shift so the earth
+        // fills the right ~half of the screen regardless of aspect ratio.
+        function updateEarthLayout() {
+            const W = window.innerWidth;
+            const H = window.innerHeight;
+            const aspect = W / H;
+
+            // On very wide screens the earth has more room; narrow/portrait = pull back more
+            // Base camera distance: we want earth radius 60 to subtend ~38% of screen height
+            // FOV=45, so visible height at dist D = 2*D*tan(22.5°) ≈ D*0.828
+            // We want 2*60 / (D*0.828) ≈ 0.38  →  D ≈ 120 / 0.315 ≈ 381 ... too far
+            // Instead we use a simpler heuristic: target earth to fill ~55% of screen height
+            // visibleHeight at D = D * 2 * tan(FOV/2 in rad) = D * 0.8284
+            // earthDiameterFraction = (2*radius) / visibleHeight = 0.55
+            // → D = 2*radius / (0.55 * 0.8284) = 120 / 0.4556 ≈ 263
+            // For wider screens we can zoom in more (earth fills more right-half space)
+            // For narrow screens we zoom out to avoid clipping
+
+            // Clamp aspect between 1.0 (square) and 2.5 (ultra-wide)
+            const clampedAspect = Math.max(1.0, Math.min(aspect, 2.5));
+
+            // Camera Z: shorter distance = bigger earth on screen
+            // At aspect 1.0 (portrait/square): stay far so earth isn't clipped → Z=260
+            // At aspect 1.78 (16:9): nice fill → Z=190
+            // At aspect 2.5 (ultra-wide): can go closer → Z=160
+            const menuCameraZ = 260 - (clampedAspect - 1.0) / 1.5 * 100;
+            // Round to integer
+            const menuZ = Math.round(menuCameraZ);
+
+            // Shift: how far right to push the canvas (as vw %)
+            // On wide screens we shift more so the earth is clearly on the right
+            // On narrow screens we shift less to keep earth in view
+            const shiftVw = Math.round(8 + (clampedAspect - 1.0) / 1.5 * 10); // 8vw→18vw
+
+            // Apply the CSS variable
+            document.documentElement.style.setProperty('--earth-shift', shiftVw + 'vw');
+
+            // Store for use when navigating to menu/server/settings screens
+            window._menuEarthCameraZ = menuZ;
+
+            // If currently on a "shifted" screen, apply immediately
+            const shiftedScreens = ['menu-screen', 'server-screen', 'settings-screen'];
+            const currentActive = document.querySelector('.screen.active');
+            if (currentActive && shiftedScreens.includes(currentActive.id)) {
+                if (camera) {
+                    targetCameraZ = menuZ;
+                }
+            }
+        }
+
         window.addEventListener('resize', () => {
             if (camera && renderer) { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); }
+            updateEarthLayout();
             const isPortrait = window.innerHeight > window.innerWidth; if (document.getElementById('init-screen').classList.contains('active')) document.querySelector('.orientation-warning').style.display = isPortrait ? 'block' : 'none';
         });
 
@@ -1198,6 +1250,7 @@ textureLoader.load(
 
             // 🌍 Logo 一出現就同時開始 preload 地球 + BGM（並行，不阻塞畫面）
             init3DEarth();
+            updateEarthLayout(); // compute adaptive earth size for current screen ratio
             bgm.load(); // 預先緩衝 BGM
 
             // Fade in (0.4s)
@@ -1239,13 +1292,14 @@ textureLoader.load(
             updateProgress();
         }
 
-        function goToMainMenu() { document.getElementById('loading-screen').classList.remove('active'); document.getElementById('menu-screen').classList.add('active'); document.getElementById('bgContainer').classList.add('shifted'); startBGM(); }
+        function goToMainMenu() { document.getElementById('loading-screen').classList.remove('active'); document.getElementById('menu-screen').classList.add('active'); document.getElementById('bgContainer').classList.add('shifted'); updateEarthLayout(); targetCameraZ = window._menuEarthCameraZ || 190; startBGM(); }
 
         let loginTipsInterval = null; 
         function navigateTo(targetScreenId) {
             document.querySelectorAll('.screen').forEach(el => el.classList.remove('active')); document.getElementById(targetScreenId).classList.add('active');
             if (targetScreenId !== 'login-character-screen' && loginTipsInterval) { clearInterval(loginTipsInterval); loginTipsInterval = null; }
-            if (targetScreenId === 'menu-screen') { earthMode = 'menu'; targetCameraZ = 250; }
+            if (targetScreenId === 'menu-screen') { earthMode = 'menu'; targetCameraZ = window._menuEarthCameraZ || 190; document.getElementById('bgContainer').classList.add('shifted'); }
+            if (targetScreenId === 'server-screen' || targetScreenId === 'settings-screen') { earthMode = 'menu'; targetCameraZ = window._menuEarthCameraZ || 190; document.getElementById('bgContainer').classList.add('shifted'); }
             // BGM：menu 同 server-screen 播放，其他 screen 暫停
             const bgmScreens = ['menu-screen', 'server-screen'];
             const spawnBgmScreens = ['reincarnation-screen', 'spawn-screen', 'character-loading-screen'];
