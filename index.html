@@ -438,7 +438,7 @@
             margin-bottom: 0;
         }
 
-        /* One section per year */
+        /* One section per year — single flat bar, no internal stacking */
         .tl-section {
             flex: 1;
             min-width: 0;
@@ -446,34 +446,20 @@
             border-radius: 4px;
             cursor: pointer;
             position: relative;
-            transition: filter 0.18s, transform 0.18s;
+            transition: filter 0.18s, transform 0.18s, opacity 0.3s ease;
             transform-origin: center bottom;
-            /* Segments inside: flex column of event blocks */
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            padding: 2px;
+            opacity: 0;
+        }
+        .tl-section.show {
+            opacity: 1;
         }
         .tl-section:hover {
-            filter: brightness(1.35);
-            transform: scaleY(1.12);
+            filter: brightness(1.4);
+            transform: scaleY(1.15);
             z-index: 2;
         }
 
-        /* Individual event block inside a section */
-        .tl-event-block {
-            flex: 1;
-            border-radius: 2px;
-            min-height: 4px;
-            opacity: 0;
-            transform: scaleY(0.2);
-            transform-origin: top center;
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-        .tl-event-block.show {
-            opacity: 1;
-            transform: scaleY(1);
-        }
+        /* (event blocks replaced by flat section color — no child divs needed) */
 
         /* Empty year: just a thin dim line */
         .tl-section-empty {
@@ -507,21 +493,13 @@
             color: rgba(255,255,255,0.7);
         }
 
-        /* Color by event count */
-        .sec-c0  { /* handled as empty */ }
-        .sec-c1  { background: rgba(30, 55, 153, 0.5); }
-        .sec-c2  { background: rgba(36, 117, 176, 0.6); }
-        .sec-c3  { background: rgba(0, 168, 255, 0.65); }
-        .sec-c4  { background: rgba(0, 206, 201, 0.7); }
-        .sec-c5  { background: rgba(46, 204, 113, 0.75); }
-        .sec-c6p { background: rgba(241, 196, 15, 0.8); }
-
-        .blk-c1  { background: #1e3799; }
-        .blk-c2  { background: #2475b0; }
-        .blk-c3  { background: #00a8ff; }
-        .blk-c4  { background: #00cec9; }
-        .blk-c5  { background: #2ecc71; }
-        .blk-c6p { background: #f1c40f; }
+        /* Relative color by event count (applied directly to .tl-section) */
+        .tl-section.blk-c1  { background: rgba(30,  55, 153, 0.55); }
+        .tl-section.blk-c2  { background: rgba(36, 117, 176, 0.65); }
+        .tl-section.blk-c3  { background: rgba(0,  168, 255, 0.70); }
+        .tl-section.blk-c4  { background: rgba(0,  206, 201, 0.78); }
+        .tl-section.blk-c5  { background: rgba(46, 204, 113, 0.82); }
+        .tl-section.blk-c6p { background: rgba(241,196,  15, 0.88); }
 
         /* Tap hint tooltip above hovered section */
         .tl-section::after {
@@ -1816,10 +1794,10 @@ textureLoader.load(
 
         <div class="timeline-scroll-area">
             <div class="timeline-legend">
-                <span><span class="legend-seg" style="background:#1e3799;"></span>少</span>
-                <span><span class="legend-seg" style="background:#00a8ff;"></span>中</span>
-                <span><span class="legend-seg" style="background:#2ecc71;"></span>多</span>
-                <span><span class="legend-seg" style="background:#f1c40f;"></span>非常多</span>
+                <span><span class="legend-seg" style="background:#1e3799;"></span>相對少</span>
+                <span><span class="legend-seg" style="background:#00a8ff;"></span>相對中</span>
+                <span><span class="legend-seg" style="background:#2ecc71;"></span>相對多</span>
+                <span><span class="legend-seg" style="background:#f1c40f;"></span>最多</span>
             </div>
             <div class="timeline-outer" id="history-timeline"></div>
         </div>
@@ -1961,9 +1939,6 @@ textureLoader.load(
             const outer = document.getElementById('history-timeline');
             outer.innerHTML = '';
 
-            // Use already-simulated history (set during handleLogin)
-            // simulatedHistory is already populated; no re-simulation here
-
             // ── Build single horizontal rail ──
             const rail = document.createElement('div');
             rail.className = 'timeline-rail';
@@ -1971,17 +1946,11 @@ textureLoader.load(
             const labelsRow = document.createElement('div');
             labelsRow.className = 'timeline-labels';
 
+            // Compute max event count for relative coloring
+            const maxCount = Math.max(1, ...simulatedHistory.map(y => y.events.length));
+
             simulatedHistory.forEach((yearData, i) => {
                 const count = yearData.events.length;
-
-                // Color class
-                let blkClass;
-                if      (count === 1) blkClass = 'blk-c1';
-                else if (count === 2) blkClass = 'blk-c2';
-                else if (count === 3) blkClass = 'blk-c3';
-                else if (count === 4) blkClass = 'blk-c4';
-                else if (count === 5) blkClass = 'blk-c5';
-                else if (count >= 6) blkClass = 'blk-c6p';
 
                 if (count === 0) {
                     // Empty year: thin dim line
@@ -1991,25 +1960,27 @@ textureLoader.load(
                     sec.onclick = () => openYearEventModal(yearData);
                     rail.appendChild(sec);
                 } else {
-                    // Section with one block per event stacked inside
+                    // Single flat bar — color based on relative count
+                    const ratio = count / maxCount;
+                    let blkClass;
+                    if      (ratio <= 0.17) blkClass = 'blk-c1';
+                    else if (ratio <= 0.34) blkClass = 'blk-c2';
+                    else if (ratio <= 0.50) blkClass = 'blk-c3';
+                    else if (ratio <= 0.67) blkClass = 'blk-c4';
+                    else if (ratio <= 0.84) blkClass = 'blk-c5';
+                    else                   blkClass = 'blk-c6p';
+
                     const sec = document.createElement('div');
-                    sec.className = 'tl-section';
+                    sec.className = 'tl-section ' + blkClass;
                     sec.setAttribute('data-age', yearData.age + '年');
                     sec.onclick = () => openYearEventModal(yearData);
-
-                    for (let e = 0; e < count; e++) {
-                        const blk = document.createElement('div');
-                        blk.className = 'tl-event-block ' + blkClass;
-                        blk.style.transitionDelay = (i * 25 + e * 15) + 'ms';
-                        sec.appendChild(blk);
-                    }
+                    sec.style.transitionDelay = (i * 18) + 'ms';
                     rail.appendChild(sec);
                 }
 
                 // Label
                 const lbl = document.createElement('div');
                 lbl.className = 'tl-label';
-                // Show age label every 2 years to avoid overcrowding
                 lbl.textContent = (i % 2 === 0) ? yearData.age + '年' : '';
                 labelsRow.appendChild(lbl);
             });
@@ -2017,9 +1988,9 @@ textureLoader.load(
             outer.appendChild(rail);
             outer.appendChild(labelsRow);
 
-            // Trigger animations
+            // Trigger fade-in animations
             requestAnimationFrame(() => {
-                outer.querySelectorAll('.tl-event-block').forEach(el => el.classList.add('show'));
+                outer.querySelectorAll('.tl-section').forEach(el => el.classList.add('show'));
             });
         }
 
