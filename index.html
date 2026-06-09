@@ -1808,7 +1808,7 @@ textureLoader.load(
 
         (async function fetchEventsData() {
             try {
-                const r = await fetch('https://raw.githubusercontent.com/a330900neo/EarthOnlinememe/main/events.json');
+                const r = await fetch('https://raw.githubusercontent.com/a330900neo/EarthOnlinememe/refs/heads/main/events.json');
                 if (r.ok) { const j = await r.json(); if (j.events) eventsData = j.events; }
             } catch(e) {}
         })();
