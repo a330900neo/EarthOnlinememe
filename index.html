@@ -3235,7 +3235,7 @@ textureLoader.load(
         // Fetch from GitHub
         (async function fetchShopItems() {
             try {
-                const r = await fetch('https://raw.githubusercontent.com/a330900neo/EarthOnlinememe/main/shopitems.json');
+                const r = await fetch('https://raw.githubusercontent.com/a330900neo/EarthOnlinememe/refs/heads/main/shopitems.json');
                 if (r.ok) {
                     const j = await r.json();
                     if (j.items && j.items.length > 0) shopItemsData = j.items;
