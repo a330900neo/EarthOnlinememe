@@ -247,8 +247,7 @@
           "label": "語音輸入裝置",
           "inputType": "dropdown",
           "options": [
-            "Default(口部)",
-            "口部"
+            "Default(口部)","口部"
           ],
           "value": "口部",
           "toastTitle": null,
