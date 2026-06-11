@@ -3,7 +3,7 @@
     {
       "id": "account",
       "label": "帳號及角色",
-      "icon": "account",
+      "icon": "user",
       "showOnlyIn": [
         "character-loading-screen",
         "login-character-screen"
@@ -41,7 +41,7 @@
     {
       "id": "social",
       "label": "社交",
-      "icon": "social",
+      "icon": "message-square",
       "items": [
         {
           "id": "chat_permission",
@@ -74,7 +74,7 @@
     {
       "id": "control",
       "label": "控制",
-      "icon": "control",
+      "icon": "gamepad-2",
       "items": [
         {
           "id": "auto_balance",
@@ -117,7 +117,7 @@
     {
       "id": "display",
       "label": "畫面",
-      "icon": "display",
+      "icon": "tv-minimal",
       "items": [
         {
           "id": "view_mode",
@@ -200,7 +200,7 @@
     {
       "id": "audio",
       "label": "聲音及語言",
-      "icon": "audio",
+      "icon": "audio-lines",
       "items": [
         {
           "id": "voice_volume",
