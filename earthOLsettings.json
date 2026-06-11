@@ -249,7 +249,7 @@
           "options": [
             "Default(口部)","口部"
           ],
-          "value": "口部",
+          "value": "Default(口部)",
           "toastTitle": null,
           "toastMsg": null,
           "locked": false,
