@@ -1,0 +1,40 @@
+{
+  "items": [
+    {
+      "id": "iq_boost",
+      "name": "增加智商發展速度",
+      "desc": "購買後會使腦部更快發展",
+      "price": 31.415926,
+      "currency": "運氣幣",
+      "icon": "mdi:brain",
+      "iconColor": "#00a8ff"
+    },
+    {
+      "id": "muscle_boost",
+      "name": "增加肌肉發展速度",
+      "desc": "購買後會使肌肉更快發展",
+      "price": 30,
+      "currency": "運氣幣",
+      "icon": "mdi:dumbbell",
+      "iconColor": "#ff6b35"
+    },
+    {
+      "id": "attraction_boost",
+      "name": "增加異性緣",
+      "desc": "購買後更易遇上異性",
+      "price": 1549,
+      "currency": "運氣幣",
+      "icon": "mdi:heart",
+      "iconColor": "#ff4757"
+    },
+    {
+      "id": "li_field_reduce",
+      "name": "減弱李氏力場",
+      "desc": "支持減弱李氏力場，我要停課！",
+      "price": 8,
+      "currency": "運氣幣",
+      "icon": "mdi:weather-cloudy",
+      "iconColor": "#2ecc71"
+    }
+  ]
+}
