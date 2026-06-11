@@ -2657,17 +2657,27 @@ textureLoader.load(
             const cdd = document.createElement('div');
             cdd.className = 'cdd ' + (item.canOpen ? 'functional' : 'locked');
 
-            const chevronSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
-
             const trigger = document.createElement('div');
             trigger.className = 'cdd-trigger';
 
             const val = item.value || (item.options && item.options[0]) || '';
+
+            // Build label span
             const label = document.createElement('span');
             label.className = 'cdd-label';
             label.textContent = val;
             trigger.appendChild(label);
-            trigger.innerHTML += chevronSvg;
+
+            // Build chevron via DOM (NOT innerHTML+= which would detach `label`)
+            const chevron = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            chevron.setAttribute('width', '12'); chevron.setAttribute('height', '12');
+            chevron.setAttribute('viewBox', '0 0 24 24'); chevron.setAttribute('fill', 'none');
+            chevron.setAttribute('stroke', 'currentColor'); chevron.setAttribute('stroke-width', '2.5');
+            chevron.setAttribute('stroke-linecap', 'round'); chevron.setAttribute('stroke-linejoin', 'round');
+            const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+            poly.setAttribute('points', '6 9 12 15 18 9');
+            chevron.appendChild(poly);
+            trigger.appendChild(chevron);
 
             cdd.appendChild(trigger);
 
@@ -2679,9 +2689,11 @@ textureLoader.load(
                     const op = document.createElement('div');
                     op.className = 'cdd-option' + (opt === val ? ' selected' : '');
                     op.textContent = opt;
+                    // Use pointerdown + preventDefault to beat the global close-on-outside listener
                     op.addEventListener('pointerdown', (e) => {
+                        e.preventDefault();   // prevents global listener from stealing focus
                         e.stopPropagation();
-                        label.textContent = opt;
+                        label.textContent = opt;  // label is still the live DOM node
                         menu.querySelectorAll('.cdd-option').forEach(o => o.classList.remove('selected'));
                         op.classList.add('selected');
                         cdd.classList.remove('open');
