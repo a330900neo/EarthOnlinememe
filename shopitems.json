@@ -28,12 +28,30 @@
       "iconColor": "#ff4757"
     },
     {
+      "id": "extend_life",
+      "name": "增加最大遊玩年數",
+      "desc": "購買後可以玩更耐",
+      "price": 2000,
+      "currency": "運氣幣",
+      "icon": "material-symbols:heart-plus",
+      "iconColor": "#ff0a0a"
+    },
+    {
+      "id": "betterlogic",
+      "name": "邏輯思維",
+      "desc": "購買後會更清醒",
+      "price": 50,
+      "currency": "運氣幣",
+      "icon": "ix:logic-diagram",
+      "iconColor": "#1af053"
+    },
+    {
       "id": "li_field_reduce",
       "name": "減弱李氏力場",
       "desc": "支持減弱李氏力場，我要停課！",
       "price": 8,
       "currency": "運氣幣",
-      "icon": "mdi:weather-cloudy",
+      "icon": "mingcute:typhoon-fill",
       "iconColor": "#2ecc71"
     }
   ]
