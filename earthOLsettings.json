@@ -1,0 +1,261 @@
+{
+  "categories": [
+    {
+      "id": "account",
+      "label": "帳號及角色",
+      "icon": "account",
+      "showOnlyIn": [
+        "character-loading-screen",
+        "login-character-screen"
+      ],
+      "items": [
+        {
+          "id": "account_password",
+          "label": "帳號密碼",
+          "inputType": "button",
+          "buttonLabel": "更改",
+          "toastTitle": "系統提示",
+          "toastMsg": "密碼為DNA加密，無法更改",
+          "locked": true
+        },
+        {
+          "id": "char_appearance",
+          "label": "角色外觀",
+          "inputType": "button",
+          "buttonLabel": "更改",
+          "toastTitle": "系統提示",
+          "toastMsg": "隨機生成，無法更改",
+          "locked": true
+        },
+        {
+          "id": "delete_account",
+          "label": "刪除帳號",
+          "inputType": "self",
+          "toastTitle": "系統提示",
+          "toastMsg": "無法刪除帳號",
+          "locked": true,
+          "danger": true
+        }
+      ]
+    },
+    {
+      "id": "social",
+      "label": "社交",
+      "icon": "social",
+      "items": [
+        {
+          "id": "chat_permission",
+          "label": "誰可以和我聊天",
+          "inputType": "dropdown",
+          "options": [
+            "任何人"
+          ],
+          "value": "任何人",
+          "toastTitle": "系統提示",
+          "toastMsg": "全局遊戲設定，無法更改",
+          "locked": true,
+          "canOpen": false
+        },
+        {
+          "id": "friend_invite",
+          "label": "誰可以發送好友邀請給我",
+          "inputType": "dropdown",
+          "options": [
+            "任何人"
+          ],
+          "value": "任何人",
+          "toastTitle": "系統提示",
+          "toastMsg": "全局遊戲設定，無法更改",
+          "locked": true,
+          "canOpen": false
+        }
+      ]
+    },
+    {
+      "id": "control",
+      "label": "控制",
+      "icon": "control",
+      "items": [
+        {
+          "id": "auto_balance",
+          "label": "自動平衡",
+          "inputType": "toggle",
+          "value": true,
+          "toastTitle": "系統提示",
+          "toastMsg": "角色默認設置，無法關閉",
+          "locked": true
+        },
+        {
+          "id": "auto_limit_power",
+          "label": "自動限制力量",
+          "inputType": "toggle",
+          "value": true,
+          "toastTitle": "系統提示",
+          "toastMsg": "角色默認安全設置，無法手動關閉",
+          "locked": true
+        },
+        {
+          "id": "auto_stabilize",
+          "label": "自動鏡頭防震",
+          "inputType": "toggle",
+          "value": true,
+          "toastTitle": "系統提示",
+          "toastMsg": "角色默認設置，無法關閉",
+          "locked": true
+        },
+        {
+          "id": "keybind",
+          "label": "鍵位",
+          "inputType": "button",
+          "buttonLabel": "更改",
+          "toastTitle": "系統提示",
+          "toastMsg": "腦部自動設置，不可手動更改",
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "display",
+      "label": "畫面",
+      "icon": "display",
+      "items": [
+        {
+          "id": "view_mode",
+          "label": "視角",
+          "inputType": "segmented",
+          "options": [
+            "第一人稱",
+            "追蹤",
+            "跟隨"
+          ],
+          "value": "第一人稱",
+          "toastTitle": "系統提示",
+          "toastMsg": "遊戲系統設置，不可手動更改",
+          "locked": true
+        },
+        {
+          "id": "smart_focus",
+          "label": "智能對焦",
+          "inputType": "toggle",
+          "value": true,
+          "toastTitle": "系統提示",
+          "toastMsg": "眼部原廠設置，無法關閉",
+          "locked": true
+        },
+        {
+          "id": "auto_brightness",
+          "label": "自動亮度",
+          "inputType": "toggle",
+          "value": true,
+          "toastTitle": "系統提示",
+          "toastMsg": "眼部原廠設置，無法關閉",
+          "locked": true
+        },
+        {
+          "id": "render_distance",
+          "label": "渲染距離",
+          "inputType": "slider",
+          "min": 0,
+          "max": 100,
+          "value": 100,
+          "toastTitle": "系統提示",
+          "toastMsg": "不可改，由天氣決定",
+          "locked": true
+        },
+        {
+          "id": "resolution",
+          "label": "解像度",
+          "inputType": "dropdown",
+          "options": [
+            "原生解析度"
+          ],
+          "value": "原生解析度",
+          "toastTitle": "系統提示",
+          "toastMsg": "受角色屬性影響，無法更改",
+          "locked": true,
+          "canOpen": false
+        },
+        {
+          "id": "fov",
+          "label": "FOV",
+          "inputType": "slider",
+          "min": 0,
+          "max": 100,
+          "value": 100,
+          "toastTitle": "系統提示",
+          "toastMsg": "受角色屬性影響，無法更改",
+          "locked": true
+        },
+        {
+          "id": "rtx",
+          "label": "RTX 光線追蹤",
+          "inputType": "toggle",
+          "value": true,
+          "toastTitle": "系統提示",
+          "toastMsg": "遊戲物理設置，無法關閉",
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "audio",
+      "label": "聲音及語言",
+      "icon": "audio",
+      "items": [
+        {
+          "id": "voice_volume",
+          "label": "人聲",
+          "inputType": "slider",
+          "min": 0,
+          "max": 100,
+          "value": 100,
+          "toastTitle": "系統提示",
+          "toastMsg": "受角色屬性影響，無法更改",
+          "locked": true
+        },
+        {
+          "id": "ambient_volume",
+          "label": "環境聲",
+          "inputType": "slider",
+          "min": 0,
+          "max": 100,
+          "value": 100,
+          "toastTitle": "系統提示",
+          "toastMsg": "受角色屬性影響，無法更改",
+          "locked": true
+        },
+        {
+          "id": "smart_filter",
+          "label": "智能過濾及處理",
+          "inputType": "toggle",
+          "value": true,
+          "toastTitle": "系統提示",
+          "toastMsg": "角色原廠功能，無法更改",
+          "locked": true
+        },
+        {
+          "id": "language",
+          "label": "語言",
+          "inputType": "button",
+          "buttonLabel": "編輯",
+          "toastTitle": "系統提示",
+          "toastMsg": "地區鎖定",
+          "locked": true
+        },
+        {
+          "id": "voice_input",
+          "label": "語音輸入裝置",
+          "inputType": "dropdown",
+          "options": [
+            "口部"
+          ],
+          "value": "口部",
+          "toastTitle": null,
+          "toastMsg": null,
+          "locked": false,
+          "canOpen": true
+        }
+      ]
+    }
+  ]
+}
