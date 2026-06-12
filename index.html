@@ -3939,46 +3939,102 @@ textureLoader.load(
         return out;
     }
 
+    // Cache of last-rendered signature per player row, to avoid unnecessary DOM churn
+    const _opRowSig = new Map();
+
+    function _buildOpRowSig(p, name) {
+        const offline = !p.isOnline ? '1' : '0';
+        const newBadge = _newPlayerNames.has(name) ? '1' : '0';
+        return [name, p.type, offline, p.timestamp, p.gender, p.constitution, p.wealth, newBadge].join('|');
+    }
+
+    function _buildOpRowInner(p, name) {
+        const tag = p.type === 'login'
+            ? '<span class="op-player-tag login">登入</span>'
+            : '<span class="op-player-tag register">已註冊</span>';
+        const offline = !p.isOnline ? ' <span style="color:rgba(255,255,255,0.25);font-size:0.65rem;">· 離線</span>' : '';
+        // Show time in list row
+        let rowTime = '';
+        if (p.timestamp) {
+            const d = new Date(p.timestamp);
+            rowTime = ` <span style="color:rgba(255,255,255,0.25);font-size:0.62rem;font-family:monospace;">${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}</span>`;
+        }
+        const newBadge = _newPlayerNames.has(name) ? ' <span class="op-new-badge">NEW</span>' : '';
+        return `
+                <div class="op-player-name">${name}${offline}${rowTime}${newBadge}</div>
+                ${tag}
+                <div class="op-player-basic">性別:${p.gender||'?'} 體質:${p.constitution||'?'} 家境:$${(p.wealth||0).toLocaleString()}</div>`;
+    }
+
     function refreshOpList() {
         const panel = document.getElementById('op-list-panel');
         if (!panel) return;
         const all = getAllPlayers();
         if (all.size === 0) {
             panel.innerHTML = '<div class="op-empty-list">尚未有玩家連線</div>';
+            _opRowSig.clear();
             updateOpStatus('已連線 · 等待玩家');
             return;
         }
-        panel.innerHTML = '';
-        all.forEach((p, name) => {
-            const row = document.createElement('div');
-            row.className = 'op-player-row' + (_selectedPlayerName === name ? ' active' : '');
-            row.dataset.playerName = name;
-            row.onclick = () => selectPlayer(name);
-            const tag = p.type === 'login'
-                ? '<span class="op-player-tag login">登入</span>'
-                : '<span class="op-player-tag register">已註冊</span>';
-            const offline = !p.isOnline ? ' <span style="color:rgba(255,255,255,0.25);font-size:0.65rem;">· 離線</span>' : '';
-            // Show time in list row
-            let rowTime = '';
-            if (p.timestamp) {
-                const d = new Date(p.timestamp);
-                rowTime = ` <span style="color:rgba(255,255,255,0.25);font-size:0.62rem;font-family:monospace;">${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}</span>`;
-            }
-            const newBadge = _newPlayerNames.has(name) ? ' <span class="op-new-badge">NEW</span>' : '';
-            row.innerHTML = `
-                <div class="op-player-name">${name}${offline}${rowTime}${newBadge}</div>
-                ${tag}
-                <div class="op-player-basic">性別:${p.gender||'?'} 體質:${p.constitution||'?'} 家境:$${(p.wealth||0).toLocaleString()}</div>`;
-            panel.appendChild(row);
+        // Remove the empty-list placeholder if present
+        const emptyEl = panel.querySelector('.op-empty-list');
+        if (emptyEl) emptyEl.remove();
+
+        // Sort by timestamp descending (most recent activity first).
+        // Players without a timestamp sort to the end.
+        const order = Array.from(all.keys()).sort((a, b) => {
+            const ta = all.get(a).timestamp || 0;
+            const tb = all.get(b).timestamp || 0;
+            return tb - ta;
         });
+
+        // Remove rows for players no longer known
+        Array.from(panel.querySelectorAll('.op-player-row')).forEach(row => {
+            const name = row.dataset.playerName;
+            if (!all.has(name)) {
+                row.remove();
+                _opRowSig.delete(name);
+            }
+        });
+
+        let selectedDataChanged = false;
+        let prevEl = null;
+        order.forEach(name => {
+            const p = all.get(name);
+            const sig = _buildOpRowSig(p, name);
+            let row = panel.querySelector(`.op-player-row[data-player-name="${CSS.escape(name)}"]`);
+            const isNewRow = !row;
+            if (isNewRow) {
+                row = document.createElement('div');
+                row.className = 'op-player-row';
+                row.dataset.playerName = name;
+                row.onclick = () => selectPlayer(name);
+            }
+            // Ensure correct position: insert after prevEl (or at start if prevEl is null)
+            const wantedNextSibling = prevEl ? prevEl.nextSibling : panel.firstChild;
+            if (row !== wantedNextSibling) {
+                panel.insertBefore(row, wantedNextSibling);
+            }
+            // Only touch innerHTML if content actually changed (avoids flicker/reflow)
+            if (isNewRow || _opRowSig.get(name) !== sig) {
+                row.innerHTML = _buildOpRowInner(p, name);
+                _opRowSig.set(name, sig);
+                if (name === _selectedPlayerName) selectedDataChanged = true;
+            }
+            row.classList.toggle('active', _selectedPlayerName === name);
+            prevEl = row;
+        });
+
         updateOpStatus(`已連線 · ${onlinePlayers.size} 在線 / ${all.size} 已知`);
-        // Always refresh detail panel for selected player (live update when screen is open)
-        if (_selectedPlayerName && all.has(_selectedPlayerName)) {
+        // Only rebuild the detail panel if the selected player's underlying data changed,
+        // so viewing a player's history isn't disrupted by unrelated list updates.
+        if (_selectedPlayerName && all.has(_selectedPlayerName) && selectedDataChanged) {
             selectPlayer(_selectedPlayerName);
         }
     }
 
-    function selectPlayer(name) {
+    function selectPlayer(name, opts) {
+        opts = opts || {};
         _selectedPlayerName = name;
         _newPlayerNames.delete(name); // clear NEW badge on selection
         document.querySelectorAll('.op-player-row').forEach(r => r.classList.toggle('active', r.dataset.playerName === name));
@@ -3988,28 +4044,50 @@ textureLoader.load(
         const ct = document.getElementById('op-detail-content');
         if (ph) ph.style.display = 'none';
         if (ct) {
+            // Preserve the currently-selected timeline year (active-seg) across re-renders
+            // triggered by background data updates, so viewing a player's history isn't disrupted.
+            let preservedAge = null;
+            const prevActiveSeg = ct.querySelector('.op-mini-tl-seg.active-seg');
+            if (prevActiveSeg) preservedAge = prevActiveSeg.getAttribute('data-op-age');
+
             ct.style.display = 'block';
             ct.innerHTML = buildDetailHTML(p);
             // Attach click handlers to mini timeline segments
-            ct.querySelectorAll('.op-mini-tl-seg').forEach(seg => {
+            const segs = ct.querySelectorAll('.op-mini-tl-seg');
+            const showYearEvents = (seg) => {
+                const age = seg.getAttribute('data-op-age');
+                let events = [];
+                try { events = JSON.parse(decodeURIComponent(seg.getAttribute('data-op-events') || '[]')); } catch(e) {}
+                const container = document.getElementById('op-year-events');
+                if (!container) return;
+                container.innerHTML = `<div class="op-year-header">${age} 年 事件 (${events.length})</div>`;
+                if (events.length === 0) {
+                    container.innerHTML += `<div style="color:rgba(255,255,255,0.3);font-size:0.82rem;padding:8px 0;">本年沒有特別事件</div>`;
+                } else {
+                    events.forEach(ev => {
+                        container.innerHTML += `<div class="op-year-event-item"><div class="op-year-event-title">${ev.title||''}</div><div class="op-year-event-desc">${ev.desc||''}</div></div>`;
+                    });
+                }
+            };
+            segs.forEach(seg => {
                 seg.addEventListener('click', function() {
                     ct.querySelectorAll('.op-mini-tl-seg').forEach(s => s.classList.remove('active-seg'));
                     this.classList.add('active-seg');
-                    const age = this.getAttribute('data-op-age');
-                    let events = [];
-                    try { events = JSON.parse(decodeURIComponent(this.getAttribute('data-op-events') || '[]')); } catch(e) {}
-                    const container = document.getElementById('op-year-events');
-                    if (!container) return;
-                    container.innerHTML = `<div class="op-year-header">${age} 年 事件 (${events.length})</div>`;
-                    if (events.length === 0) {
-                        container.innerHTML += `<div style="color:rgba(255,255,255,0.3);font-size:0.82rem;padding:8px 0;">本年沒有特別事件</div>`;
-                    } else {
-                        events.forEach(ev => {
-                            container.innerHTML += `<div class="op-year-event-item"><div class="op-year-event-title">${ev.title||''}</div><div class="op-year-event-desc">${ev.desc||''}</div></div>`;
-                        });
-                    }
+                    showYearEvents(this);
                 });
             });
+            // Restore previously-selected year if it still exists in the refreshed data
+            if (preservedAge !== null) {
+                let restored = null;
+                segs.forEach(seg => {
+                    if (seg.getAttribute('data-op-age') === preservedAge) restored = seg;
+                });
+                if (restored) {
+                    ct.querySelectorAll('.op-mini-tl-seg').forEach(s => s.classList.remove('active-seg'));
+                    restored.classList.add('active-seg');
+                    showYearEvents(restored);
+                }
+            }
         }
     }
 
