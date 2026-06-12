@@ -19,6 +19,24 @@
       "iconColor": "#ff6b35"
     },
     {
+      "id": "antivirus",
+      "name": "防毒",
+      "desc": "購買後會減少隨機性病毒感染機會",
+      "price": 40,
+      "currency": "運氣幣",
+      "icon": "bxs:virus-block",
+      "iconColor": "#03fca5"
+    },
+    {
+      "id": "dasher",
+      "name": "速度爆發力",
+      "desc": "購買後會增強角色速度爆發力",
+      "price": 35,
+      "currency": "運氣幣",
+      "icon": "material-symbols:sprint",
+      "iconColor": "#b5ff08"
+    },
+    {
       "id": "attraction_boost",
       "name": "增加異性緣",
       "desc": "購買後更易遇上異性",
@@ -52,7 +70,25 @@
       "price": 8,
       "currency": "運氣幣",
       "icon": "mingcute:typhoon-fill",
-      "iconColor": "#2ecc71"
+      "iconColor": "#baf8ff"
+    },
+    {
+      "id": "better_network",
+      "name": "穩定連線",
+      "desc": "加強角色的連線,减少斷線",
+      "price": 80,
+      "currency": "運氣幣",
+      "icon": "streamline-ultimate:user-network-bold",
+      "iconColor": "#80ffff"
+    },
+    {
+      "id": "public_housing_express",
+      "name": "公屋排快啲",
+      "desc": "輪候公屋快啲",
+      "price": 100,
+      "currency": "運氣幣",
+      "icon": "material-symbols:apartment",
+      "iconColor": "#a5bf69"
     }
   ]
 }
