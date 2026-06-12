@@ -604,7 +604,7 @@
             background: linear-gradient(90deg, rgba(0,168,255,0.15), rgba(0,124,179,0.3));
             border: 1px solid rgba(0,168,255,0.5);
             color: white;
-            padding: 9px 22px;
+            padding: 9px 9px;
             border-radius: 22px;
             font-size: 0.95rem;
             font-weight: bold;
@@ -992,7 +992,7 @@
         }
         /* Character loading: small top padding so settings btn has room, keep centred */
         #character-loading-screen {
-            padding-top: 52px !important;
+            padding-top: 108px !important;
             padding-bottom: 0 !important;
         }
 
@@ -1377,6 +1377,143 @@
             line-height: 1.4;
         }
 
+        /* ===== 其他玩家 Button (on login/awake screens, below 任務管理) ===== */
+        .top-players-btn {
+            position: absolute; top: 75px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(90deg, rgba(46,204,113,0.18), rgba(0,168,100,0.32));
+            border: 1px solid rgba(46,204,113,0.7); color: white; padding: 9px 28px;
+            border-radius: 25px; font-size: 1rem; font-weight: bold; letter-spacing: 4px;
+            cursor: pointer; backdrop-filter: blur(5px);
+            box-shadow: 0 0 14px rgba(46,204,113,0.3);
+            z-index: 15; transition: all 0.2s ease; opacity: 0; pointer-events: none;
+            display: flex; align-items: center; gap: 8px;
+        }
+        /* On register screen (character-loading), no mission btn above, so sit at 30px */
+        #character-loading-screen .top-players-btn { top: 30px; }
+        #login-character-screen.active .top-players-btn,
+        #character-loading-screen.active .top-players-btn,
+        #loading-screen.active .top-players-btn { opacity: 1; pointer-events: auto; }
+        .top-players-btn:hover { background: rgba(46,204,113,0.35); box-shadow: 0 0 22px rgba(46,204,113,0.6); }
+        .top-players-btn .players-notif-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #2ecc71;
+            display: none; animation: blink-dot 0.6s ease-in-out 3;
+            box-shadow: 0 0 6px #2ecc71;
+        }
+        .top-players-btn .players-notif-dot.show { display: block; }
+        @keyframes blink-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(1.6); }
+        }
+        /* Flash the button border */
+        @keyframes btn-flash {
+            0%, 100% { box-shadow: 0 0 14px rgba(46,204,113,0.3); border-color: rgba(46,204,113,0.7); }
+            50% { box-shadow: 0 0 28px rgba(46,204,113,0.9); border-color: #2ecc71; }
+        }
+        .top-players-btn.flash { animation: btn-flash 0.5s ease-in-out 4; }
+
+        /* ===== 其他玩家 Screen ===== */
+        #other-players-screen {
+            background: transparent;
+            z-index: 28;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: flex-start;
+        }
+        .op-frost {
+            position: absolute; inset: 0;
+            background: rgba(4, 12, 22, 0.84);
+            backdrop-filter: blur(18px) saturate(1.5);
+            -webkit-backdrop-filter: blur(18px) saturate(1.5);
+            z-index: 0;
+        }
+        .op-topbar {
+            position: relative; z-index: 2;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 22px 5vw 16px;
+            border-bottom: 1px solid rgba(46,204,113,0.22);
+            flex-shrink: 0;
+        }
+        .op-topbar-left { display: flex; flex-direction: column; }
+        .op-page-title { font-size: 1.55rem; font-weight: 900; color: #2ecc71; letter-spacing: 5px; }
+        .op-page-sub { font-size: 0.7rem; color: rgba(255,255,255,0.32); font-family: monospace; letter-spacing: 2px; margin-top: 3px; }
+        .op-back-btn {
+            background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.28);
+            color: white; padding: 9px 24px; font-size: 0.9rem; letter-spacing: 3px;
+            border-radius: 6px; cursor: pointer; transition: all 0.2s ease; font-weight: bold;
+        }
+        .op-back-btn:hover { background: white; color: black; }
+        .op-body {
+            position: relative; z-index: 2; flex: 1; overflow: hidden;
+            display: flex; flex-direction: row; gap: 0;
+        }
+        /* Left: player list */
+        .op-list-panel {
+            width: 280px; min-width: 220px; flex-shrink: 0;
+            border-right: 1px solid rgba(46,204,113,0.12);
+            overflow-y: auto; padding: 16px 0;
+        }
+        .op-list-panel::-webkit-scrollbar { width: 3px; }
+        .op-list-panel::-webkit-scrollbar-thumb { background: rgba(46,204,113,0.4); border-radius: 2px; }
+        .op-player-row {
+            padding: 12px 20px; cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            transition: background 0.15s; display: flex; flex-direction: column; gap: 3px;
+        }
+        .op-player-row:hover { background: rgba(46,204,113,0.08); }
+        .op-player-row.active { background: rgba(46,204,113,0.12); border-left: 3px solid #2ecc71; padding-left: 17px; }
+        .op-player-name { font-size: 0.98rem; font-weight: bold; color: #fff; letter-spacing: 1px; }
+        .op-player-tag {
+            font-size: 0.7rem; font-family: monospace;
+            padding: 2px 7px; border-radius: 3px; display: inline-block; width: fit-content;
+            letter-spacing: 1px;
+        }
+        .op-player-tag.login { background: rgba(0,168,255,0.18); color: #00a8ff; border: 1px solid rgba(0,168,255,0.35); }
+        .op-player-tag.register { background: rgba(241,196,15,0.18); color: #f1c40f; border: 1px solid rgba(241,196,15,0.35); }
+        .op-player-basic { font-size: 0.75rem; color: rgba(255,255,255,0.45); font-family: monospace; }
+        .op-empty-list { padding: 30px 20px; text-align: center; color: rgba(255,255,255,0.3); font-size: 0.9rem; letter-spacing: 1px; }
+        /* Right: detail panel */
+        .op-detail-panel {
+            flex: 1; overflow-y: auto; padding: 24px 4vw;
+        }
+        .op-detail-panel::-webkit-scrollbar { width: 4px; }
+        .op-detail-panel::-webkit-scrollbar-thumb { background: rgba(46,204,113,0.35); border-radius: 2px; }
+        .op-detail-placeholder {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100%; color: rgba(255,255,255,0.2); font-size: 1rem; letter-spacing: 2px;
+            gap: 12px;
+        }
+        .op-detail-placeholder::before { content: '👤'; font-size: 3rem; }
+        .op-section-title { font-size: 1rem; color: #2ecc71; font-weight: bold; letter-spacing: 3px;
+            margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(46,204,113,0.2); }
+        .op-stat-line { display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 8px; padding: 10px 16px; margin-bottom: 8px; }
+        .op-stat-label { font-size: 0.9rem; color: #ccc; letter-spacing: 1px; }
+        .op-stat-val { font-size: 0.9rem; font-weight: bold; color: #fff; font-family: monospace; }
+        .op-trait-box { background: rgba(0,0,0,0.3); padding: 10px 14px; border-radius: 6px;
+            margin-bottom: 8px; border-left: 4px solid #ff4757; }
+        .op-trait-box.good { border-left-color: #2ecc71; }
+        .op-trait-box.neutral { border-left-color: #f1c40f; }
+        .op-trait-box h4 { color: #fff; font-size: 0.95rem; margin-bottom: 4px; }
+        .op-trait-box p { color: rgba(255,255,255,0.6); font-size: 0.8rem; line-height: 1.4; }
+        .op-ach-item { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; }
+        .op-ach-title { font-size: 0.95rem; font-weight: bold; margin-bottom: 3px; }
+        .op-ach-desc { font-size: 0.78rem; color: rgba(255,255,255,0.6); line-height: 1.4; }
+        .op-section-gap { margin-top: 22px; }
+        .op-status-bar {
+            position: relative; z-index: 2;
+            padding: 8px 5vw; font-size: 0.72rem; color: rgba(46,204,113,0.6);
+            font-family: monospace; letter-spacing: 1px;
+            border-top: 1px solid rgba(46,204,113,0.1); flex-shrink: 0;
+            display: flex; gap: 16px; align-items: center;
+        }
+        .op-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #2ecc71; display: inline-block; box-shadow: 0 0 5px #2ecc71; animation: pulse 2s infinite; }
+        @media (max-width: 600px) {
+            .op-list-panel { width: 160px; min-width: 130px; }
+            .op-detail-panel { padding: 16px 3vw; }
+        }
+
         /* ===== 開發商 Logo 啟動畫面 ===== */
         #dev-logo-screen {
             position: fixed;
@@ -1404,10 +1541,77 @@
             object-fit: contain;
             filter: drop-shadow(0 0 20px rgba(0, 168, 255, 0.4));
         }
+        .op-new-badge {
+            display: inline-block;
+            font-size: 0.55rem;
+            font-weight: bold;
+            font-family: monospace;
+            letter-spacing: 1px;
+            padding: 1px 5px;
+            border-radius: 3px;
+            background: rgba(46,204,113,0.25);
+            color: #2ecc71;
+            border: 1px solid rgba(46,204,113,0.5);
+            margin-left: 5px;
+            vertical-align: middle;
+            animation: blink-dot 1.2s infinite;
+        }
+        .op-mini-timeline {
+            display: flex;
+            flex-direction: row;
+            gap: 2px;
+            height: 28px;
+            align-items: stretch;
+            margin-bottom: 4px;
+        }
+        .op-mini-tl-seg {
+            flex: 1;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: filter 0.15s, transform 0.15s;
+            min-width: 6px;
+        }
+        .op-mini-tl-seg:hover {
+            filter: brightness(1.4);
+            transform: scaleY(1.1);
+        }
+        .op-mini-tl-seg.active-seg {
+            outline: 2px solid rgba(255,255,255,0.6);
+        }
+        .op-mini-tl-labels {
+            display: flex;
+            flex-direction: row;
+            gap: 2px;
+            margin-bottom: 10px;
+        }
+        .op-mini-tl-lbl {
+            flex: 1;
+            font-family: monospace;
+            font-size: 0.58rem;
+            color: rgba(255,255,255,0.3);
+            text-align: center;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .op-year-event-item {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+        }
+        .op-year-event-title { font-size: 0.9rem; font-weight: bold; color: #fff; letter-spacing: 1px; margin-bottom: 3px; }
+        .op-year-event-desc  { font-size: 0.78rem; color: rgba(255,255,255,0.55); line-height: 1.4; }
+        .op-year-header {
+            font-size: 0.85rem; color: #2ecc71; font-weight: bold; letter-spacing: 2px;
+            margin-bottom: 8px; padding-bottom: 6px;
+            border-bottom: 1px solid rgba(46,204,113,0.15);
+        }
     </style>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
 </head>
 <body>
 
@@ -1515,6 +1719,9 @@
     <div id="character-loading-screen" class="screen">
         <button class="ingame-settings-btn" onclick="openIngameSettings()">設定</button>
         <button class="ingame-shop-btn" onclick="openShop()">🛒 商店</button>
+        <button class="top-players-btn" id="reg-players-btn" onclick="openOtherPlayers()">
+            <span class="players-notif-dot" id="reg-players-notif"></span>其他玩家
+        </button>
         <div class="char-split-container">
             <div class="char-section">
                 <h3>角色屬性</h3>
@@ -1537,6 +1744,9 @@
         <button class="ingame-shop-btn" onclick="openShop()">🛒 商店</button>
         <button class="history-open-btn" onclick="openHistoryScreen()">角色歷史</button>
         <button class="top-mission-btn" onclick="openMissionManager()">任務管理</button>
+        <button class="top-players-btn" id="login-players-btn" onclick="openOtherPlayers()">
+            <span class="players-notif-dot" id="login-players-notif"></span>其他玩家
+        </button>
 
         <div class="left-panel-container login-panel-transparent">
             <h2 class="page-header">角色資訊</h2>
@@ -2770,8 +2980,8 @@ textureLoader.load(
             return { history, finalLove: state.love };
         }
 
-        let playerTraits = [];
-        let simulatedHistory = [];
+        window.playerTraits = [];
+        window.simulatedHistory = [];
 
         function openHistoryScreen() {
             // Render traits
@@ -3235,7 +3445,7 @@ textureLoader.load(
         // Fetch from GitHub
         (async function fetchShopItems() {
             try {
-                const r = await fetch('https://raw.githubusercontent.com/a330900neo/EarthOnlinememe/refs/heads/main/shopitems.json');
+                const r = await fetch('https://raw.githubusercontent.com/a330900neo/EarthOnlinememe/main/shopitems.json');
                 if (r.ok) {
                     const j = await r.json();
                     if (j.items && j.items.length > 0) shopItemsData = j.items;
@@ -3363,6 +3573,559 @@ textureLoader.load(
                 document.getElementById('lp-close-btn').style.display = '';
             }, delay);
         }
+
+    </script>
+
+    <!-- ===== 其他玩家 Screen ===== -->
+    <div id="other-players-screen" class="screen">
+        <div class="op-frost"></div>
+        <div class="op-topbar">
+            <div class="op-topbar-left">
+                <div class="op-page-title">其他玩家</div>
+                <div class="op-page-sub">OTHER PLAYERS · MQTT ONLINE</div>
+            </div>
+            <button class="op-back-btn" onclick="closeOtherPlayers()">返回</button>
+        </div>
+        <div class="op-body">
+            <div class="op-list-panel" id="op-list-panel">
+                <div class="op-empty-list" id="op-empty-msg">尚未有玩家連線</div>
+            </div>
+            <div class="op-detail-panel" id="op-detail-panel">
+                <div class="op-detail-placeholder" id="op-detail-placeholder">選擇一位玩家查看詳情</div>
+                <div id="op-detail-content" style="display:none;"></div>
+            </div>
+        </div>
+        <div class="op-status-bar">
+            <span class="op-status-dot"></span>
+            <span id="op-status-text">MQTT 連接中...</span>
+        </div>
+    </div>
+
+    <script>
+    // ==================== MQTT 多人系統 ====================
+
+    const MQTT_BROKER        = 'wss://broker.emqx.io:8084/mqtt';
+    const MQTT_TOPIC_BC      = 'earthonline/v1/broadcast';
+    const MQTT_TOPIC_REQ     = 'earthonline/v1/request';
+    const MQTT_TOPIC_RESP    = 'earthonline/v1/response';
+    const MQTT_TOPIC_ROSTER  = 'earthonline/v1/roster';   // peer recent-list exchange
+    const MAX_RECENT         = 25;
+
+    let mqttClient     = null;
+    let mqttConnected  = false;
+    let myPlayerNumber = null;   // "玩家042"
+    let myPlayerType   = null;   // 'login' | 'register'
+    let myPlayerData   = null;
+
+    // Stores keyed by playerName
+    const onlinePlayers = new Map();
+    const recentPlayers = new Map(); // up to MAX_RECENT, includes offline
+
+    // Every player number ever seen (from broadcasts, responses, and roster replies).
+    // Used by assignPlayerNumber() so we never reuse a number that exists in any
+    // peer's recent list, even after that peer disconnected.
+    const _knownNumbers = new Set();
+
+    let _opPrevScreen = null;
+
+    // ── Track all seen player numbers ────────────────────────────────────────
+    function _registerName(name) {
+        if (!name) return;
+        if (/^玩家\d+$/.test(name)) _knownNumbers.add(name);
+    }
+
+    // ── Assign player number ──────────────────────────────────────────────
+    // Always max(all known numbers) + 1 — never fills gaps.
+    function assignPlayerNumber() {
+        let maxSeen = 0;
+        _knownNumbers.forEach(name => {
+            const m = name.match(/^玩家(\d+)$/);
+            if (m) {
+                const n = parseInt(m[1], 10);
+                if (n > maxSeen) maxSeen = n;
+            }
+        });
+        const nextNum = maxSeen + 1;
+        return '玩家' + String(nextNum).padStart(3, '0');
+    }
+
+    // ── Build login payload ───────────────────────────────────────────────
+    function buildLoginPayload() {
+        return {
+            playerName:   myPlayerNumber,
+            type:         'login',
+            timestamp:    Date.now(),
+            gender:       playerContext.gender,
+            wealth:       playerContext.wealth,
+            constitution: playerContext.constitution,
+            years:        playerContext.years || 0,
+            region:       '香港',
+            love:         playerContext.love || 'A0',
+            traits:       (window.playerTraits || []).map(t => ({ id:t.id, title:t.title, desc:t.desc, type:t.type||'' })),
+            achievements: (playerContext.achievements || []).map(id => {
+                const a = achievementsData.find(x => x.id === id);
+                return a ? { id:a.id, title:a.title, desc:a.desc, color:a.color } : null;
+            }).filter(Boolean),
+            history:      (window.simulatedHistory || []),
+        };
+    }
+
+    // ── Build register payload ─────────────────────────────────────────────
+    function buildRegisterPayload() {
+        return {
+            playerName:   myPlayerNumber,
+            type:         'register',
+            timestamp:    Date.now(),
+            gender:       window._regGender       || '?',
+            wealth:       window._regWealth        || 0,
+            constitution: window._regConstitution  || 0,
+            years:        0,
+            region:       '香港',
+            traits:       (window.playerTraits || []).map(t => ({ id:t.id, title:t.title, desc:t.desc, type:t.type||'' })),
+            history:      [],
+        };
+    }
+
+    // ── MQTT connect ──────────────────────────────────────────────────────
+    function mqttConnect() {
+        if (mqttClient) return;
+        if (typeof mqtt === 'undefined') { updateOpStatus('MQTT 庫未載入'); return; }
+        try {
+            mqttClient = mqtt.connect(MQTT_BROKER, {
+                clientId:        'earthol_' + Math.random().toString(36).substr(2, 9),
+                clean:           true,
+                connectTimeout:  10000,
+                reconnectPeriod: 4000,
+            });
+            mqttClient.on('connect', () => {
+                mqttConnected = true;
+                mqttClient.subscribe([MQTT_TOPIC_BC, MQTT_TOPIC_REQ, MQTT_TOPIC_RESP, MQTT_TOPIC_ROSTER], () => {
+                    // Always send an anonymous discovery probe on (re)connect so we
+                    // learn the current highest player number before we assign our own.
+                    mqttPub(MQTT_TOPIC_REQ, { from: '_discovery_' + Math.random().toString(36).substr(2,5), ts: Date.now() });
+                });
+                updateOpStatus('已連線');
+                // Re-announce ourselves if we already have a number (e.g. after reconnect)
+                if (myPlayerData && myPlayerNumber) {
+                    mqttPub(MQTT_TOPIC_BC, { action: 'join', ...myPlayerData });
+                    mqttPub(MQTT_TOPIC_REQ, { from: myPlayerNumber, ts: Date.now() });
+                }
+            });
+            mqttClient.on('message', (topic, msg) => {
+                try {
+                    const d = JSON.parse(msg.toString());
+                    if (topic === MQTT_TOPIC_BC)        handleBroadcast(d);
+                    else if (topic === MQTT_TOPIC_REQ)  handleRequest(d);
+                    else if (topic === MQTT_TOPIC_RESP) handleResponse(d);
+                    else if (topic === MQTT_TOPIC_ROSTER) handleRoster(d);
+                } catch(e) {}
+            });
+            mqttClient.on('error',     () => { mqttConnected = false; updateOpStatus('連線錯誤'); });
+            mqttClient.on('offline',   () => { mqttConnected = false; updateOpStatus('離線，重試中...'); });
+            mqttClient.on('reconnect', () => updateOpStatus('重新連線中...'));
+        } catch(e) { updateOpStatus('MQTT 連線失敗'); }
+    }
+
+    function mqttPub(topic, obj) {
+        if (!mqttConnected || !mqttClient) return;
+        mqttClient.publish(topic, JSON.stringify(obj), { qos: 0 });
+    }
+
+    // ── Message handlers ──────────────────────────────────────────────────
+    // Track newly seen players for the "NEW" badge
+    const _newPlayerNames = new Set();
+
+    function handleBroadcast(d) {
+        if (!d || !d.playerName || d.playerName === myPlayerNumber) return;
+        _registerName(d.playerName);
+        if (d.action === 'leave') {
+            onlinePlayers.delete(d.playerName);
+        } else {
+            // Merge: preserve history from existing data if new broadcast doesn't include it
+            const existing = onlinePlayers.get(d.playerName) || recentPlayers.get(d.playerName);
+            if (existing && existing.history && existing.history.length > 0 && (!d.history || d.history.length === 0)) {
+                d.history = existing.history;
+            }
+            const isNew = !onlinePlayers.has(d.playerName) && !recentPlayers.has(d.playerName);
+            if (isNew) _newPlayerNames.add(d.playerName);
+            onlinePlayers.set(d.playerName, d);
+            addToRecent(d.playerName, d);
+        }
+        refreshOpList();
+        // Only flash notification buttons if NOT already on the other-players screen
+        const cur = document.querySelector('.screen.active');
+        if (!cur || cur.id !== 'other-players-screen') {
+            triggerPlayersNotification();
+        }
+    }
+
+    function handleRequest(d) {
+        if (!d || d.from === myPlayerNumber) return;
+        if (d.from && /^玩家\d+$/.test(d.from)) _registerName(d.from);
+        if (!d.from) return;
+        if (d.from.startsWith('_discovery_')) {
+            if (!mqttConnected) return;
+            // Broadcast own live data so newcomer sees us as online
+            if (myPlayerData) {
+                mqttPub(MQTT_TOPIC_BC, { action: 'join', ...myPlayerData });
+            }
+            // Send full recent-player data (up to MAX_RECENT) so the newcomer
+            // gets complete records for inactive players too, not just names.
+            const rosterPlayers = [];
+            recentPlayers.forEach((data) => rosterPlayers.push(data));
+            // Include ourselves if not already in recentPlayers
+            if (myPlayerData && myPlayerNumber && !recentPlayers.has(myPlayerNumber)) {
+                rosterPlayers.push(myPlayerData);
+            }
+            mqttPub(MQTT_TOPIC_ROSTER, { players: rosterPlayers, ts: Date.now() });
+            return;
+        }
+        if (myPlayerData && mqttConnected) {
+            mqttPub(MQTT_TOPIC_RESP, { target: d.from, ...myPlayerData });
+        }
+    }
+
+    function handleResponse(d) {
+        if (!d || !d.playerName || d.playerName === myPlayerNumber) return;
+        _registerName(d.playerName);
+        const existing = onlinePlayers.get(d.playerName) || recentPlayers.get(d.playerName);
+        if (existing && existing.history && existing.history.length > 0 && (!d.history || d.history.length === 0)) {
+            d.history = existing.history;
+        }
+        onlinePlayers.set(d.playerName, d);
+        addToRecent(d.playerName, d);
+        refreshOpList();
+    }
+
+    // ── Roster: a peer shares their full recentPlayers list ─────────────
+    // Ingest every record into our own recentPlayers (not onlinePlayers —
+    // these are inactive/offline) and register all names so assignPlayerNumber()
+    // never reuses any of them.
+    function handleRoster(d) {
+        if (!d || !Array.isArray(d.players)) return;
+        let changed = false;
+        d.players.forEach(p => {
+            if (!p || !p.playerName || p.playerName === myPlayerNumber) return;
+            _registerName(p.playerName);
+            // Only add to recent if we don't already have fresher data online
+            if (!onlinePlayers.has(p.playerName)) {
+                const existing = recentPlayers.get(p.playerName);
+                // Keep whichever record is newer
+                if (!existing || (p.timestamp && (!existing.timestamp || p.timestamp > existing.timestamp))) {
+                    recentPlayers.set(p.playerName, p);
+                    if (recentPlayers.size > MAX_RECENT) {
+                        recentPlayers.delete(recentPlayers.keys().next().value);
+                    }
+                    changed = true;
+                }
+            }
+        });
+        if (changed) refreshOpList();
+    }
+
+    function addToRecent(name, data) {
+        _registerName(name);
+        recentPlayers.set(name, data);
+        if (recentPlayers.size > MAX_RECENT) {
+            recentPlayers.delete(recentPlayers.keys().next().value);
+        }
+    }
+
+    // ── Deferred join: wait for discovery window then publish ─────────────
+    // discoveryWindowMs: how long to wait for other players to respond to our
+    // discovery probe before we lock in our own number.
+    const DISCOVERY_WINDOW_MS = 2000;
+
+    function _doJoin(type) {
+        // If we already have a number (e.g. login then register in same session),
+        // keep the existing number — never replace it.
+        if (!myPlayerNumber) {
+            myPlayerNumber = assignPlayerNumber();
+        }
+        myPlayerType = type;
+        myPlayerData = type === 'login' ? buildLoginPayload() : buildRegisterPayload();
+        if (mqttConnected) {
+            mqttPub(MQTT_TOPIC_BC,  { action: 'join', ...myPlayerData });
+            mqttPub(MQTT_TOPIC_REQ, { from: myPlayerNumber, ts: Date.now() });
+        }
+        window.addEventListener('beforeunload', mqttOnLeave);
+    }
+
+    function _scheduleJoin(type) {
+        mqttConnect(); // ensure MQTT is started
+        const probeId = '_discovery_' + Math.random().toString(36).substr(2, 5);
+        if (mqttConnected) {
+            // Send discovery probe — peers will reply with broadcast + roster
+            mqttPub(MQTT_TOPIC_REQ, { from: probeId, ts: Date.now() });
+            setTimeout(() => _doJoin(type), DISCOVERY_WINDOW_MS);
+        } else {
+            // on('connect') will fire the discovery probe automatically.
+            // Give extra time for: TCP connect + subscribe + probe RTT + responses.
+            setTimeout(() => _doJoin(type), DISCOVERY_WINDOW_MS + 3000);
+        }
+    }
+
+    // ── Called after login flow ────────────────────────────────────────────
+    function mqttOnLogin() {
+        _scheduleJoin('login');
+    }
+
+    // ── Called after register (goToCharacterLoading) ───────────────────────
+    function mqttOnRegister() {
+        _scheduleJoin('register');
+    }
+
+    function mqttOnLeave() {
+        if (myPlayerData && mqttConnected) {
+            mqttPub(MQTT_TOPIC_BC, { action:'leave', playerName: myPlayerNumber });
+        }
+    }
+
+    // ── Notification ──────────────────────────────────────────────────────
+    function triggerPlayersNotification() {
+        const cur = document.querySelector('.screen.active');
+        if (cur && cur.id === 'other-players-screen') return;
+        ['login-players-notif','reg-players-notif'].forEach(id => {
+            const d = document.getElementById(id);
+            if (d) d.classList.add('show');
+        });
+        ['login-players-btn','reg-players-btn'].forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) {
+                btn.classList.remove('flash');
+                void btn.offsetWidth;
+                btn.classList.add('flash');
+                btn.addEventListener('animationend', () => btn.classList.remove('flash'), { once: true });
+            }
+        });
+    }
+
+    function clearPlayersNotification() {
+        ['login-players-notif','reg-players-notif'].forEach(id => {
+            const d = document.getElementById(id); if (d) d.classList.remove('show');
+        });
+    }
+
+    // ── Open / close other players screen ─────────────────────────────────
+    function openOtherPlayers() {
+        playClick();
+        clearPlayersNotification();
+        const cur = document.querySelector('.screen.active');
+        _opPrevScreen = cur ? cur.id : 'login-character-screen';
+        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+        document.getElementById('other-players-screen').classList.add('active');
+        refreshOpList();
+    }
+
+    function closeOtherPlayers() {
+        playClick();
+        const prev = _opPrevScreen || 'login-character-screen';
+        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+        document.getElementById(prev).classList.add('active');
+    }
+
+    function updateOpStatus(msg) {
+        const el = document.getElementById('op-status-text');
+        if (el) el.textContent = msg;
+    }
+
+    // ── Player list + detail ──────────────────────────────────────────────
+    let _selectedPlayerName = null;
+
+    function getAllPlayers() {
+        const out = new Map();
+        onlinePlayers.forEach((v,k) => out.set(k, { ...v, isOnline: true }));
+        recentPlayers.forEach((v,k) => { if (!out.has(k)) out.set(k, { ...v, isOnline: false }); });
+        return out;
+    }
+
+    function refreshOpList() {
+        const panel = document.getElementById('op-list-panel');
+        if (!panel) return;
+        const all = getAllPlayers();
+        if (all.size === 0) {
+            panel.innerHTML = '<div class="op-empty-list">尚未有玩家連線</div>';
+            updateOpStatus('已連線 · 等待玩家');
+            return;
+        }
+        panel.innerHTML = '';
+        all.forEach((p, name) => {
+            const row = document.createElement('div');
+            row.className = 'op-player-row' + (_selectedPlayerName === name ? ' active' : '');
+            row.dataset.playerName = name;
+            row.onclick = () => selectPlayer(name);
+            const tag = p.type === 'login'
+                ? '<span class="op-player-tag login">登入</span>'
+                : '<span class="op-player-tag register">已註冊</span>';
+            const offline = !p.isOnline ? ' <span style="color:rgba(255,255,255,0.25);font-size:0.65rem;">· 離線</span>' : '';
+            // Show time in list row
+            let rowTime = '';
+            if (p.timestamp) {
+                const d = new Date(p.timestamp);
+                rowTime = ` <span style="color:rgba(255,255,255,0.25);font-size:0.62rem;font-family:monospace;">${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}</span>`;
+            }
+            const newBadge = _newPlayerNames.has(name) ? ' <span class="op-new-badge">NEW</span>' : '';
+            row.innerHTML = `
+                <div class="op-player-name">${name}${offline}${rowTime}${newBadge}</div>
+                ${tag}
+                <div class="op-player-basic">性別:${p.gender||'?'} 體質:${p.constitution||'?'} 家境:$${(p.wealth||0).toLocaleString()}</div>`;
+            panel.appendChild(row);
+        });
+        updateOpStatus(`已連線 · ${onlinePlayers.size} 在線 / ${all.size} 已知`);
+        // Always refresh detail panel for selected player (live update when screen is open)
+        if (_selectedPlayerName && all.has(_selectedPlayerName)) {
+            selectPlayer(_selectedPlayerName);
+        }
+    }
+
+    function selectPlayer(name) {
+        _selectedPlayerName = name;
+        _newPlayerNames.delete(name); // clear NEW badge on selection
+        document.querySelectorAll('.op-player-row').forEach(r => r.classList.toggle('active', r.dataset.playerName === name));
+        const p = getAllPlayers().get(name);
+        if (!p) return;
+        const ph = document.getElementById('op-detail-placeholder');
+        const ct = document.getElementById('op-detail-content');
+        if (ph) ph.style.display = 'none';
+        if (ct) {
+            ct.style.display = 'block';
+            ct.innerHTML = buildDetailHTML(p);
+            // Attach click handlers to mini timeline segments
+            ct.querySelectorAll('.op-mini-tl-seg').forEach(seg => {
+                seg.addEventListener('click', function() {
+                    ct.querySelectorAll('.op-mini-tl-seg').forEach(s => s.classList.remove('active-seg'));
+                    this.classList.add('active-seg');
+                    const age = this.getAttribute('data-op-age');
+                    let events = [];
+                    try { events = JSON.parse(decodeURIComponent(this.getAttribute('data-op-events') || '[]')); } catch(e) {}
+                    const container = document.getElementById('op-year-events');
+                    if (!container) return;
+                    container.innerHTML = `<div class="op-year-header">${age} 年 事件 (${events.length})</div>`;
+                    if (events.length === 0) {
+                        container.innerHTML += `<div style="color:rgba(255,255,255,0.3);font-size:0.82rem;padding:8px 0;">本年沒有特別事件</div>`;
+                    } else {
+                        events.forEach(ev => {
+                            container.innerHTML += `<div class="op-year-event-item"><div class="op-year-event-title">${ev.title||''}</div><div class="op-year-event-desc">${ev.desc||''}</div></div>`;
+                        });
+                    }
+                });
+            });
+        }
+    }
+
+    function statRow(label, val) {
+        return `<div class="op-stat-line"><span class="op-stat-label">${label}</span><span class="op-stat-val">${val}</span></div>`;
+    }
+
+    function buildDetailHTML(p) {
+        // Format timestamp
+        let timeStr = '—';
+        if (p.timestamp) {
+            const d = new Date(p.timestamp);
+            const hh = String(d.getHours()).padStart(2,'0');
+            const mm = String(d.getMinutes()).padStart(2,'0');
+            const ss = String(d.getSeconds()).padStart(2,'0');
+            const mo = String(d.getMonth()+1).padStart(2,'0');
+            const dd = String(d.getDate()).padStart(2,'0');
+            timeStr = `${d.getFullYear()}-${mo}-${dd} ${hh}:${mm}:${ss}`;
+        }
+
+        let h = `<div class="op-section-title">角色屬性</div>`;
+        h += statRow('性別', p.gender || '?');
+        h += statRow('家境(月入)', `$${(p.wealth||0).toLocaleString()} HKD`);
+        h += statRow('地區', p.region || '香港');
+        h += statRow('體質', `${p.constitution||'?'} / 100`);
+        h += statRow('遊玩年數', `${p.years||0} 年`);
+        if (p.type === 'login' && p.love) h += statRow('愛情經驗', p.love);
+        h += statRow(p.type === 'login' ? '登入時間' : '註冊時間', timeStr);
+
+        h += `<div class="op-section-title op-section-gap">角色特質</div>`;
+        if (p.traits && p.traits.length > 0) {
+            p.traits.forEach(t => {
+                h += `<div class="op-trait-box ${t.type||''}"><h4>${t.title}</h4><p>${t.desc}</p></div>`;
+            });
+        } else {
+            h += `<div class="op-trait-box" style="border-left-color:#888;"><h4>凡夫俗子</h4><p>沒有獲得任何特殊出廠設定</p></div>`;
+        }
+
+        if (p.type === 'login') {
+            h += `<div class="op-section-title op-section-gap">解鎖成就</div>`;
+            if (p.achievements && p.achievements.length > 0) {
+                p.achievements.forEach(a => {
+                    h += `<div class="op-ach-item"><div class="op-ach-title" style="color:${a.color||'#fff'};">${a.title}</div><div class="op-ach-desc">${a.desc}</div></div>`;
+                });
+            } else {
+                h += `<div style="color:rgba(255,255,255,0.3);font-size:0.85rem;font-style:italic;padding:8px 0;">此角色過於平凡，未解鎖任何成就</div>`;
+            }
+
+            // Character history — only for login players
+            h += `<div class="op-section-title op-section-gap">角色歷史</div>`;
+            if (p.history && p.history.length > 0) {
+                const maxCount = Math.max(1, ...p.history.map(y => (y.events||[]).length));
+                h += `<div class="op-mini-timeline">`;
+                p.history.forEach(yearData => {
+                    const count = (yearData.events||[]).length;
+                    const ratio = count / maxCount;
+                    let color = 'rgba(255,255,255,0.08)';
+                    if      (ratio > 0.84) color = 'rgba(241,196,15,0.88)';
+                    else if (ratio > 0.67) color = 'rgba(46,204,113,0.82)';
+                    else if (ratio > 0.50) color = 'rgba(0,206,201,0.78)';
+                    else if (ratio > 0.34) color = 'rgba(0,168,255,0.70)';
+                    else if (ratio > 0.17) color = 'rgba(36,117,176,0.65)';
+                    else if (ratio > 0)    color = 'rgba(30,55,153,0.55)';
+                    // Use encodeURIComponent so JSON inside attribute is safe
+                    const evJson = encodeURIComponent(JSON.stringify(yearData.events||[]));
+                    h += `<div class="op-mini-tl-seg" style="background:${color};" title="${yearData.age}年 · ${count}事件" data-op-age="${yearData.age}" data-op-events="${evJson}"></div>`;
+                });
+                h += `</div>`;
+                h += `<div class="op-mini-tl-labels">`;
+                p.history.forEach((yearData, i) => {
+                    h += `<span class="op-mini-tl-lbl">${i % 2 === 0 ? yearData.age + '年' : ''}</span>`;
+                });
+                h += `</div>`;
+                h += `<div id="op-year-events" style="margin-top:10px;"></div>`;
+            } else {
+                h += `<div style="color:rgba(255,255,255,0.3);font-size:0.85rem;font-style:italic;padding:8px 0;">未有</div>`;
+            }
+        } else {
+            // Register players — no history
+            h += `<div class="op-section-title op-section-gap">角色歷史</div>`;
+            h += `<div style="color:rgba(255,255,255,0.3);font-size:0.85rem;font-style:italic;padding:8px 0;">未有</div>`;
+        }
+
+        return h;
+    }
+
+    // ── Monkey-patch handleLogin to call mqttOnLogin after it runs ─────────
+    (function() {
+        const _origHandleLogin = window.handleLogin;
+        window.handleLogin = function() {
+            _origHandleLogin.apply(this, arguments);
+            // Run after slight delay so playerContext + playerTraits are set
+            setTimeout(mqttOnLogin, 200);
+        };
+    })();
+
+    // ── Monkey-patch goToCharacterLoading to store reg vars + call mqttOnRegister ──
+    (function() {
+        const _origGo = window.goToCharacterLoading;
+        window.goToCharacterLoading = function() {
+            _origGo.apply(this, arguments);
+            // Parse values from DOM (they were just written by original function)
+            const statsEl = document.getElementById('char-stats');
+            if (statsEl) {
+                const vals = statsEl.querySelectorAll('.stat-value');
+                // Order: constitution, wealth, gender
+                if (vals[0]) window._regConstitution = parseInt(vals[0].textContent) || 0;
+                if (vals[1]) window._regWealth = parseInt((vals[1].textContent||'').replace(/[^0-9]/g,'')) || 0;
+                if (vals[2]) window._regGender = vals[2].textContent.trim() || '?';
+            }
+            setTimeout(mqttOnRegister, 200);
+        };
+    })();
+
+    // Start MQTT eagerly (won't broadcast until we have player data)
+    mqttConnect();
 
     </script>
 
