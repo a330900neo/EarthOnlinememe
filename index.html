@@ -3631,7 +3631,11 @@ textureLoader.load(
     // ── Track all seen player numbers ────────────────────────────────────────
     function _registerName(name) {
         if (!name) return;
-        if (/^玩家\d+$/.test(name)) _knownNumbers.add(name);
+        if (/^玩家\d+$/.test(name)) {
+            const before = _knownNumbers.size;
+            _knownNumbers.add(name);
+            if (_knownNumbers.size !== before) _noteDiscoveryActivity();
+        }
     }
 
     // ── Assign player number ──────────────────────────────────────────────
@@ -3831,10 +3835,35 @@ textureLoader.load(
         }
     }
 
-    // ── Deferred join: wait for discovery window then publish ─────────────
-    // discoveryWindowMs: how long to wait for other players to respond to our
-    // discovery probe before we lock in our own number.
-    const DISCOVERY_WINDOW_MS = 2000;
+    // ── Deferred join: wait until discovery responses go quiet, then publish ──
+    // We want to hear back from everyone before locking in our own number.
+    // Strategy: every time we learn about a (new) player number, reset a short
+    // "quiet" timer. Only once no new info arrives for QUIET_MS do we assign our
+    // number. A MAX_WAIT_MS safety cap guarantees we never wait forever.
+    const QUIET_MS    = 800;   // no new responses for this long => assume done
+    const MAX_WAIT_MS = 4000;  // absolute cap from when probe was sent
+
+    let _joinPending   = false;
+    let _joinType      = null;
+    let _quietTimer    = null;
+    let _maxWaitTimer  = null;
+
+    function _finishJoin() {
+        if (!_joinPending) return;
+        _joinPending = false;
+        if (_quietTimer)   { clearTimeout(_quietTimer);   _quietTimer = null; }
+        if (_maxWaitTimer) { clearTimeout(_maxWaitTimer); _maxWaitTimer = null; }
+        _doJoin(_joinType);
+        _joinType = null;
+    }
+
+    // Call this whenever _registerName() learns about ANY player number while
+    // a join is pending — it pushes back the quiet timer.
+    function _noteDiscoveryActivity() {
+        if (!_joinPending) return;
+        if (_quietTimer) clearTimeout(_quietTimer);
+        _quietTimer = setTimeout(_finishJoin, QUIET_MS);
+    }
 
     function _doJoin(type) {
         // If we already have a number (e.g. login then register in same session),
@@ -3852,17 +3881,34 @@ textureLoader.load(
     }
 
     function _scheduleJoin(type) {
+        _joinType    = type;
+        _joinPending = true;
+
         mqttConnect(); // ensure MQTT is started
-        const probeId = '_discovery_' + Math.random().toString(36).substr(2, 5);
-        if (mqttConnected) {
-            // Send discovery probe — peers will reply with broadcast + roster
+
+        const sendProbe = () => {
+            const probeId = '_discovery_' + Math.random().toString(36).substr(2, 5);
             mqttPub(MQTT_TOPIC_REQ, { from: probeId, ts: Date.now() });
-            setTimeout(() => _doJoin(type), DISCOVERY_WINDOW_MS);
+            // Start the quiet timer now — if nobody replies at all, this fires
+            // after QUIET_MS and we proceed with whatever we know.
+            _quietTimer = setTimeout(_finishJoin, QUIET_MS);
+        };
+
+        if (mqttConnected) {
+            sendProbe();
         } else {
-            // on('connect') will fire the discovery probe automatically.
-            // Give extra time for: TCP connect + subscribe + probe RTT + responses.
-            setTimeout(() => _doJoin(type), DISCOVERY_WINDOW_MS + 3000);
+            // on('connect') already fires its own discovery probe; just start
+            // the quiet timer once we're connected.
+            const waitConnect = setInterval(() => {
+                if (mqttConnected) {
+                    clearInterval(waitConnect);
+                    _quietTimer = setTimeout(_finishJoin, QUIET_MS);
+                }
+            }, 100);
         }
+
+        // Absolute safety cap so we never get stuck waiting forever.
+        _maxWaitTimer = setTimeout(_finishJoin, MAX_WAIT_MS);
     }
 
     // ── Called after login flow ────────────────────────────────────────────
